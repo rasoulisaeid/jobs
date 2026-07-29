@@ -103,6 +103,11 @@
           ? el("a", { href: safeUrl(job.link), target: "_blank", rel: "noopener noreferrer", text: "Open ↗" })
           : null),
         el("td", { class: "col-tight" },
+          el("a", {
+            class: "row-apply", href: `apply.html?job=${encodeURIComponent(job.id)}`,
+            title: `Prepare a resume for ${job.title || "this job"}`,
+          }, el("span", { class: "material-symbols-rounded", text: "description" }), "Apply")),
+        el("td", { class: "col-tight" },
           el("button", { class: "row-edit", type: "button", text: "Edit", onclick: () => openJobModal(job) })),
       ));
     }

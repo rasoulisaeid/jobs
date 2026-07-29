@@ -14,6 +14,17 @@ desktop.ini
 seed-jobs.json
 jobs-*.json
 *.db
+
+# The real resume: this repo is public and the file carries a home address,
+# phone number and personal email. js/resume.js ships the same document with
+# those three placeheld; the real values are typed into the app and stay in
+# that browser. Keep it that way.
+resume.tex
+resume-*.tex
+*.pdf
+*.aux
+*.out
+*.synctex.gz
 *.db-wal
 *.db-shm
 

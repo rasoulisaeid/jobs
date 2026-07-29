@@ -1,0 +1,195 @@
+/* Apply page — the role at the top, the resume underneath. */
+
+/* ── the role ───────────────────────────────────────── */
+
+.job-card {
+  display: flex; align-items: flex-start; gap: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--primary);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+}
+
+.job-card-main { flex: 1; min-width: 0; }
+.job-card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.job-card-head h1 { font-size: 22px; }
+.job-company { margin: 3px 0 0; font-weight: 700; color: var(--soft); }
+
+.job-facts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 14px; }
+.job-facts span { color: var(--muted); }
+.job-facts b { font-weight: 700; color: var(--soft); }
+.job-facts a { color: var(--primary-2); font-weight: 700; }
+.job-facts a:hover { text-decoration: underline; }
+
+.posting {
+  margin-top: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+}
+.posting summary { cursor: pointer; font-weight: 700; color: var(--soft); }
+.posting pre {
+  margin: 12px 0 0; max-height: 300px; overflow: auto;
+  white-space: pre-wrap; word-break: break-word;
+  font-size: 13px; line-height: 1.55; color: var(--soft);
+}
+
+/* ── layout ─────────────────────────────────────────── */
+
+.apply-grid {
+  display: grid; grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px; margin-top: 18px; align-items: start;
+}
+
+.editor-pane, .panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+}
+
+.side-pane { display: flex; flex-direction: column; gap: 14px; }
+
+.pane-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.pane-head h2 { font-size: 18px; }
+.panel h3 { font-size: 15px; margin-bottom: 8px; }
+.pane-note { color: var(--muted); font-size: 13px; margin: 0; }
+
+.toolbar-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0;
+}
+.toolbar-row .spacer { flex: 1; }
+.toolbar-row form { margin: 0; }
+
+/* ── the rendered resume ────────────────────────────── */
+
+/* Approximates the compiled PDF: serif face, the article class's heading
+   weights, and a sheet of paper to sit on. */
+.paper {
+  background: #fff;
+  border: 1px solid var(--border-2);
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(45, 45, 80, .10);
+  padding: 46px 52px;
+  font-family: "Latin Modern Roman", "Computer Modern", Georgia, "Times New Roman", Times, serif;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #14141c;
+  overflow-x: auto;
+}
+
+.paper p { margin: 0 0 9px; }
+.paper a { color: inherit; text-decoration: none; }
+.paper a:hover { text-decoration: underline; }
+
+/* Matches the \titleformat rule in the preamble. */
+.paper h2 {
+  font-size: 17px; font-weight: 700; letter-spacing: 0;
+  margin: 18px 0 7px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #14141c;
+}
+.paper h2:first-child { margin-top: 0; }
+.paper h3 { font-size: 15px; font-weight: 700; margin: 13px 0 5px; }
+
+.paper ul, .paper ol { margin: 4px 0 9px; padding-left: 18px; }
+.paper li { margin: 0 0 3px; }
+
+/* \hfill — parts pushed apart across the line */
+.r-row { display: flex; gap: 14px; align-items: baseline; margin: 9px 0 2px; }
+.r-row > span:first-child { text-align: left; }
+.r-row > span { flex: 1; text-align: center; }
+.r-row > span:last-child { text-align: right; white-space: nowrap; }
+.r-row > span:only-child { text-align: left; }
+
+.r-center { text-align: center; margin-bottom: 14px; line-height: 1.5; }
+
+.r-xl { font-size: 24px; letter-spacing: .02em; }
+.r-lg { font-size: 20px; }
+.r-md { font-size: 17px; }
+.r-sm { font-size: 13px; }
+.r-xs { font-size: 12px; }
+.r-ul { text-decoration: underline; }
+.r-tt { font-family: ui-monospace, Consolas, monospace; font-size: .92em; }
+
+/* ── the source, tucked away ────────────────────────── */
+
+.source { margin-top: 14px; }
+.source summary {
+  cursor: pointer; font-size: 13px; font-weight: 700;
+  color: var(--muted); padding: 4px 0;
+  list-style-position: outside;
+}
+.source summary:hover { color: var(--primary-2); }
+
+#latex {
+  width: 100%; min-height: 320px; resize: vertical; margin-top: 8px;
+  font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.6;
+  tab-size: 2;
+  white-space: pre; overflow-wrap: normal; overflow-x: auto;
+}
+
+/* ── banners ────────────────────────────────────────── */
+
+.banner {
+  border-radius: var(--r-sm); padding: 11px 14px;
+  font-size: 14px; margin: 0 0 12px;
+}
+.banner.warn { background: var(--amber-soft); color: var(--amber-ink); }
+
+/* ── changes + versions ─────────────────────────────── */
+
+.changes { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.changes li {
+  font-size: 13px; line-height: 1.5; color: var(--soft);
+  padding-left: 18px; position: relative;
+}
+.changes li::before {
+  content: "→"; position: absolute; left: 0; color: var(--primary); font-weight: 800;
+}
+
+.versions { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.versions:empty { display: none; }
+
+.version {
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 9px 11px; display: flex; align-items: center; gap: 8px;
+}
+.version.active { border-color: var(--primary); background: var(--primary-soft); }
+.version-main { flex: 1; min-width: 0; cursor: pointer; }
+.version-name {
+  font-weight: 700; font-size: 14px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.version-date { font-size: 12px; color: var(--muted); }
+
+.version button {
+  background: none; border: none; padding: 2px 5px; border-radius: 7px;
+  color: var(--muted); line-height: 1;
+}
+.version button:hover { background: var(--red-soft); color: var(--red-dark); }
+
+/* ── narrow screens ─────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .apply-grid { grid-template-columns: minmax(0, 1fr); }
+  .job-card { flex-direction: column; }
+  .paper { padding: 26px 22px; font-size: 14px; }
+  .r-row { flex-wrap: wrap; gap: 2px 12px; }
+  .r-row > span, .r-row > span:last-child { text-align: left; flex: none; }
+  #latex { min-height: 260px; }
+}
+
+/* Ctrl+P prints just the resume, at full width, no chrome. */
+@media print {
+  .topbar, .job-card, .posting, .side-pane, .toolbar-row, .source,
+  .banner, .hint, .status, .pane-head, .toast { display: none !important; }
+  .apply-grid { grid-template-columns: 1fr; gap: 0; margin: 0; }
+  .editor-pane { border: none; box-shadow: none; padding: 0; }
+  .paper { border: none; box-shadow: none; padding: 0; font-size: 11pt; }
+}

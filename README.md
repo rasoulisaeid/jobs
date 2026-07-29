@@ -45,6 +45,24 @@ fact from the posting — when one is used the modal says so in red, so **check 
 before saving**. If an employer has several locations in a city and the posting
 doesn't say which, Claude falls back to `City, ST` rather than guessing.
 
+### Apply
+
+Every row has an **Apply** button that opens `apply.html?job=<id>`: the role at
+the top, the resume underneath, rendered as it will look rather than as LaTeX.
+
+**Tailor for this job** sends the posting and the resume to Claude — pinned to
+Opus 5 at high effort, since this runs once per application and a recruiter
+reads the result. It comes back re-worded and re-ordered for that posting, with
+a list of what it changed so the work can be checked. It is instructed never to
+invent an employer, date, skill or qualification; if the posting wants something
+she doesn't have, it says so in the change list instead of papering over it.
+Read it before saving — it is a language model writing a factual document.
+
+**Save as version** keeps a copy against that job. **Print / Save as PDF** is the
+quickest route to an attachment; **Overleaf** typesets the real LaTeX (and
+uploads the resume to a third party to do it). `Edit the LaTeX source` opens the
+source if it needs a hand edit.
+
 ### Interview prep
 
 The graduation-cap icon opens a study page for jewelry sales associate
@@ -65,11 +83,23 @@ browser  ──►  localStorage  ──mirror──►  Firebase RTDB /jobs/ras
 | `jobs:v1:categories` | your category list | yes |
 | `jobs:v1:prefs` | model, thinking effort, address-lookup toggle | yes |
 | `jobs:local:apiKey` | the Claude API key | **no — this device only** |
+| `jobs:local:resume` | the resume LaTeX | **no — this device only** |
+| `jobs:local:resumeVersions` | resumes tailored per job | **no — this device only** |
 
 The Firebase node is readable without auth. Job postings are public listings, so
-they go up as-is. The API key is the one thing that must not, so it is kept
-outside the synced namespace entirely — `Store.dump()` never sees it and an
-incoming sync never overwrites it.
+they go up as-is. Two things must not, so they are kept outside the synced
+namespace entirely — `Store.dump()` never sees them and an incoming sync never
+overwrites them:
+
+- **The API key.** Self-explanatory.
+- **The resume.** It carries a home city, a phone number and a personal email,
+  and this repo is public *including the database URL in `js/sync.js`* — anyone
+  reading the repo could fetch the node.
+
+The cost is that neither follows her to a second device; both are entered once
+per browser. `js/resume.js` ships the resume with the contact line placeheld
+(`CITY, STATE ZIP` / `PHONE NUMBER` / `EMAIL ADDRESS`) for the same reason, and
+the app nags until they're replaced. The filled-in `resume.tex` is gitignored.
 
 Changes sync live between devices over SSE; edits made offline are saved locally
 and pushed when the connection returns. The dot in the top bar is grey offline,
@@ -91,15 +121,21 @@ key from the browser entirely.
 
 ```
 index.html          jobs dashboard + modals
+apply.html          one job + the resume for it
 interview.html      interview prep page
 css/style.css       theme + shell (matches Systems)
+css/apply.css       apply page + the rendered "paper"
 css/interview.css   interview page styles
 js/store.js         namespaced localStorage cache
 js/sync.js          Firebase RTDB mirror (REST + SSE)
 js/ui.js            el() / clear() DOM helpers
 js/data.js          jobs model
 js/extract.js       Claude API call + extraction schema
+js/resume.js        resume + versions (device-local)
+js/latex-render.js  the LaTeX subset -> HTML preview
+js/tailor.js        resume tailoring (Opus 5, high effort)
 js/app.js           dashboard wiring
+js/apply.js         apply page wiring
 js/interview.js     interview page logic
 
 tools/import-to-firebase.mjs   one-shot bulk import of an export file

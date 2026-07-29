@@ -213,6 +213,16 @@ td a:hover { text-decoration: underline; }
 }
 .row-edit:hover { background: var(--border); color: var(--text); }
 
+/* The primary action on a row — this is what the table exists for. */
+.row-apply {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px 5px 8px; border-radius: 999px;
+  background: var(--primary-soft); color: var(--primary-dark);
+  font-size: 14px; font-weight: 800; white-space: nowrap;
+}
+.row-apply .material-symbols-rounded { font-size: 17px; }
+.row-apply:hover { background: var(--primary); color: #fff; }
+
 /* ── empty state ────────────────────────────────────── */
 
 .empty { text-align: center; padding: 70px 24px; color: var(--muted); }
