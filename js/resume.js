@@ -17,6 +17,7 @@
 (function () {
   const CELL = "jobs:local:resume";
   const CELL_VERSIONS = "jobs:local:resumeVersions";
+  const CELL_CONTACT = "jobs:local:contact";
 
   // String.raw is required, not stylistic: "\usepackage" is an invalid unicode
   // escape and a plain template literal would refuse to parse.
@@ -76,8 +77,13 @@ Bachelor of Arts, Archaeology
 \end{document}
 `;
 
-  // The strings left in DEFAULT_LATEX for her to replace. Used to nag once.
-  const PLACEHOLDERS = ["CITY, STATE ZIP", "PHONE NUMBER", "EMAIL ADDRESS"];
+  // The tokens in DEFAULT_LATEX that the saved contact details fill in.
+  const PLACEHOLDERS = {
+    address: "CITY, STATE ZIP",
+    phone: "PHONE NUMBER",
+    email: "EMAIL ADDRESS",
+  };
+  const FIELDS = Object.keys(PLACEHOLDERS);
 
   const listeners = [];
   const onChange = (fn) => { listeners.push(fn); return () => listeners.splice(listeners.indexOf(fn), 1); };
@@ -113,10 +119,55 @@ Bachelor of Arts, Archaeology
     return DEFAULT_LATEX;
   }
 
-  // True while the shipped contact line is still in place.
+  /* -------------------------------------------------------- contact details */
+
+  /* Kept apart from the LaTeX on purpose. The document keeps its placeholder
+   * tokens and they are only filled in when something is rendered, printed or
+   * exported — so the copy sent to Claude for tailoring carries no phone
+   * number, no email and no address. Stored in this browser, never synced. */
+
+  function getContact() {
+    const saved = readCell(CELL_CONTACT, {});
+    const out = {};
+    for (const f of FIELDS) out[f] = typeof saved?.[f] === "string" ? saved[f] : "";
+    return out;
+  }
+
+  function setContact(patch) {
+    const next = { ...getContact() };
+    for (const f of FIELDS) if (f in patch) next[f] = String(patch[f] || "").trim();
+    writeCell(CELL_CONTACT, next);
+    notify();
+    return next;
+  }
+
+  const hasContact = () => FIELDS.every((f) => getContact()[f]);
+
+  // TeX chokes on these, and they turn up in real addresses and emails.
+  function escapeLatex(s) {
+    return String(s)
+      .replace(/\\/g, "\\textbackslash{}")
+      .replace(/([&%$#_{}])/g, "\\$1")
+      .replace(/~/g, "\\textasciitilde{}")
+      .replace(/\^/g, "\\textasciicircum{}");
+  }
+
+  // Swaps the placeholder tokens for the saved details. Everything the user
+  // ever sees or sends goes through this.
+  function applyContact(latex, contact) {
+    const details = contact || getContact();
+    let out = String(latex || "");
+    for (const f of FIELDS) {
+      if (!details[f]) continue;
+      out = out.split(PLACEHOLDERS[f]).join(escapeLatex(details[f]));
+    }
+    return out;
+  }
+
+  // True while a placeholder would still reach the page.
   const needsContactDetails = (latex) => {
-    const text = latex === undefined ? getBase() : latex;
-    return PLACEHOLDERS.some((p) => text.includes(p));
+    const text = applyContact(latex === undefined ? getBase() : latex);
+    return FIELDS.some((f) => text.includes(PLACEHOLDERS[f]));
   };
 
   /* --------------------------------------------------------------- versions */
@@ -166,8 +217,9 @@ Bachelor of Arts, Archaeology
   }
 
   window.Resume = {
-    DEFAULT_LATEX, PLACEHOLDERS,
-    getBase, setBase, resetBase, needsContactDetails,
+    DEFAULT_LATEX, PLACEHOLDERS, FIELDS,
+    getBase, setBase, resetBase,
+    getContact, setContact, hasContact, applyContact, needsContactDetails, escapeLatex,
     listVersions, getVersion, saveVersion, deleteVersion, renameVersion,
     onChange,
   };

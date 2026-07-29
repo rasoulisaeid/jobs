@@ -110,10 +110,14 @@
 
   const isDirty = () => $("latex").value !== loadedText;
 
+  // The document keeps its placeholder tokens; the real details are only
+  // stitched in on the way out — to the preview, the printer, or a file.
+  const forOutput = () => window.Resume.applyContact($("latex").value);
+
   function renderPaper() {
     const paper = $("paper");
     try {
-      paper.innerHTML = window.LatexRender.toHtml($("latex").value);
+      paper.innerHTML = window.LatexRender.toHtml(forOutput());
     } catch (e) {
       // A preview failing must never cost her the document.
       paper.replaceChildren(el("p", {
@@ -223,7 +227,7 @@
   }
 
   function download() {
-    const url = URL.createObjectURL(new Blob([$("latex").value], { type: "application/x-tex" }));
+    const url = URL.createObjectURL(new Blob([forOutput()], { type: "application/x-tex" }));
     const link = el("a", { href: url, download: fileName("tex") });
     document.body.append(link);
     link.click();
@@ -234,7 +238,7 @@
 
   async function copyLatex() {
     try {
-      await navigator.clipboard.writeText($("latex").value);
+      await navigator.clipboard.writeText(forOutput());
       toast("LaTeX copied");
     } catch (e) {
       $("latex").select();
@@ -297,9 +301,41 @@
   });
 
   $("overleafForm").addEventListener("submit", () => {
-    $("overleafSnip").value = $("latex").value;
+    $("overleafSnip").value = forOutput();
     $("overleafName").value = fileName("tex");
   });
+
+  $("contactForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    window.Resume.setContact({
+      address: $("contactAddress").value,
+      phone: $("contactPhone").value,
+      email: $("contactEmail").value,
+    });
+    renderEditorState();
+    toast("Contact details saved on this device");
+  });
+
+  // Live preview while typing, without committing to storage yet.
+  for (const id of ["contactAddress", "contactPhone", "contactEmail"]) {
+    $(id).addEventListener("input", renderPreviewWithForm);
+  }
+
+  function renderPreviewWithForm() {
+    const draft = window.Resume.applyContact($("latex").value, {
+      address: $("contactAddress").value.trim(),
+      phone: $("contactPhone").value.trim(),
+      email: $("contactEmail").value.trim(),
+    });
+    try { $("paper").innerHTML = window.LatexRender.toHtml(draft); } catch (e) {}
+  }
+
+  function loadContactForm() {
+    const contact = window.Resume.getContact();
+    $("contactAddress").value = contact.address;
+    $("contactPhone").value = contact.phone;
+    $("contactEmail").value = contact.email;
+  }
 
   window.addEventListener("beforeunload", (event) => {
     if (!isDirty()) return;
@@ -327,6 +363,7 @@
       }
     }
     renderJob();
+    loadContactForm();
     loadIntoEditor(window.Resume.getBase(), null);
   })();
 })();

@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <link rel="stylesheet" href="css/style.css?v=4" />
-  <link rel="stylesheet" href="css/apply.css?v=4" />
+  <link rel="stylesheet" href="css/style.css?v=5" />
+  <link rel="stylesheet" href="css/apply.css?v=5" />
 </head>
 <body>
   <header class="topbar">
@@ -58,9 +58,9 @@
         </div>
 
         <p id="contactWarn" class="banner warn" hidden>
-          The contact line still says <strong>CITY, STATE ZIP</strong> / <strong>PHONE NUMBER</strong> /
-          <strong>EMAIL ADDRESS</strong>. Replace those with the real details — they are stored
-          in this browser only and never uploaded.
+          The contact line is still showing placeholder text. Fill in
+          <strong>Contact details</strong> in the panel on the right — it is saved in this
+          browser only.
         </p>
 
         <div class="toolbar-row">
@@ -123,6 +123,32 @@
         </div>
 
         <div class="panel">
+          <h3>Contact details</h3>
+          <form id="contactForm" class="contact-form" autocomplete="on">
+            <label class="field">
+              <span class="label">City, state, ZIP</span>
+              <input id="contactAddress" type="text" placeholder="City, ST 00000"
+                     autocomplete="address-level2" />
+            </label>
+            <label class="field">
+              <span class="label">Phone</span>
+              <input id="contactPhone" type="tel" placeholder="+1 (555) 123-4567"
+                     autocomplete="tel" />
+            </label>
+            <label class="field">
+              <span class="label">Email</span>
+              <input id="contactEmail" type="email" placeholder="name@example.com"
+                     autocomplete="email" />
+            </label>
+            <button type="submit" class="btn primary small wide">Save contact details</button>
+          </form>
+          <p class="pane-note contact-note">
+            Saved in this browser only — never pushed to GitHub or Firebase, and not included
+            in what gets sent to Claude for tailoring.
+          </p>
+        </div>
+
+        <div class="panel">
           <h3>Versions</h3>
           <p id="versionsEmpty" class="pane-note">
             Nothing saved yet. Tailor the resume, check it, then <strong>Save as version</strong>.
@@ -133,9 +159,9 @@
         <div class="panel">
           <h3>Where this lives</h3>
           <p class="pane-note">
-            The resume and its versions are stored in <strong>this browser only</strong> — they are
-            not synced, because the database is readable by anyone who has the URL and this one
-            carries a home address and phone number.
+            The resume, its versions and the contact details are stored in
+            <strong>this browser only</strong>. Nothing here syncs — the database is readable by
+            anyone who has the URL, and that URL is in a public repo.
           </p>
           <button id="resetBtn" class="btn ghost small">Reset to the shipped resume</button>
         </div>
@@ -145,13 +171,13 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="js/store.js?v=4"></script>
-  <script src="js/sync.js?v=4"></script>
-  <script src="js/ui.js?v=4"></script>
-  <script src="js/data.js?v=4"></script>
-  <script src="js/resume.js?v=4"></script>
-  <script src="js/latex-render.js?v=4"></script>
-  <script src="js/tailor.js?v=4"></script>
-  <script src="js/apply.js?v=4"></script>
+  <script src="js/store.js?v=5"></script>
+  <script src="js/sync.js?v=5"></script>
+  <script src="js/ui.js?v=5"></script>
+  <script src="js/data.js?v=5"></script>
+  <script src="js/resume.js?v=5"></script>
+  <script src="js/latex-render.js?v=5"></script>
+  <script src="js/tailor.js?v=5"></script>
+  <script src="js/apply.js?v=5"></script>
 </body>
 </html>

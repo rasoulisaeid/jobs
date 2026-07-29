@@ -142,6 +142,15 @@
 }
 .banner.warn { background: var(--amber-soft); color: var(--amber-ink); }
 
+/* ── contact details ────────────────────────────────── */
+
+.contact-form { display: grid; gap: 9px; }
+.contact-form .field { display: grid; gap: 3px; }
+.contact-form .label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.contact-form input { font-size: 14px; padding: 7px 10px; }
+.btn.wide { width: 100%; justify-content: center; }
+.contact-note { margin-top: 9px; }
+
 /* ── changes + versions ─────────────────────────────── */
 
 .changes { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -185,11 +194,31 @@
   #latex { min-height: 260px; }
 }
 
-/* Ctrl+P prints just the resume, at full width, no chrome. */
+/* Ctrl+P prints just the resume, no chrome. The page margin matches the
+   geometry package in the preamble (0.85in), so the printed page and the
+   Overleaf PDF have the same shape — without it the text runs edge to edge. */
 @media print {
+  /* The margin lives on .paper, not on @page. A browser's "Margins: None"
+     setting overrides @page and would print edge to edge; element padding it
+     cannot touch. @page is zeroed so the two don't stack. */
+  @page { size: letter; margin: 0; }
+
   .topbar, .job-card, .posting, .side-pane, .toolbar-row, .source,
   .banner, .hint, .status, .pane-head, .toast { display: none !important; }
-  .apply-grid { grid-template-columns: 1fr; gap: 0; margin: 0; }
-  .editor-pane { border: none; box-shadow: none; padding: 0; }
-  .paper { border: none; box-shadow: none; padding: 0; font-size: 11pt; }
+
+  html, body { background: #fff; margin: 0; padding: 0; }
+  .view { padding: 0; margin: 0; max-width: none; width: auto; }
+  .apply-grid { display: block; gap: 0; margin: 0; }
+  .editor-pane { border: none; box-shadow: none; padding: 0; border-radius: 0; }
+
+  .paper {
+    border: none; box-shadow: none; border-radius: 0; margin: 0; width: auto;
+    padding: 0.85in;                  /* matches \usepackage[margin=0.85in]{geometry} */
+    font-size: 11pt; line-height: 1.4;
+    overflow: visible;
+  }
+  /* Don't strand a heading or split a job across the page break. */
+  .paper h2, .paper h3 { break-after: avoid; page-break-after: avoid; }
+  .paper .r-row { break-after: avoid; page-break-after: avoid; }
+  .paper li { break-inside: avoid; page-break-inside: avoid; }
 }
