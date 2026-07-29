@@ -82,11 +82,11 @@
 
     for (const job of rows) {
       const addressCell = job.address && job.address.trim().toLowerCase() !== "remote"
-        ? el("td", null, el("a", {
+        ? el("td", { class: "cell-address" }, el("a", {
             href: mapsUrl(job.address), target: "_blank", rel: "noopener noreferrer",
             title: "Open in Google Maps", text: job.address,
           }))
-        : el("td", { class: "cell-muted", text: job.address || "" });
+        : el("td", { class: "cell-address", text: job.address || "" });
 
       const [bg, fg] = job.category ? chipColor(job.category) : ["", ""];
 

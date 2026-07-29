@@ -193,6 +193,11 @@ tbody tr:hover { background: var(--card-2); }
 td a { color: var(--primary-2); font-weight: 700; }
 td a:hover { text-decoration: underline; }
 
+/* Addresses are reference detail, not something to scan — set back so the
+   title and company read first. Still a link, so it colours up on hover. */
+.cell-address, .cell-address a { font-size: 13px; font-weight: 500; color: var(--muted); }
+.cell-address a:hover { color: var(--primary-2); }
+
 .chip {
   display: inline-block;
   padding: 3px 11px;
