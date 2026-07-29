@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interview Prep — Jewelry Associate</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%238b5cf6' d='M16 3 6 11l10 18 10-18z'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/interview.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">&#9670;</span>
+        <span class="brand-name">Interview Prep</span>
+        <span class="brand-count">Jewelry Associate</span>
+      </div>
+
+      <div class="topbar-actions">
+        <input id="qSearch" type="search" placeholder="Search questions…" autocomplete="off" />
+        <button id="toggleAll" class="btn ghost small">Expand all</button>
+        <button id="resetProgress" class="btn ghost small">Reset ✓</button>
+        <a class="icon-btn" href="index.html" title="Back to jobs" aria-label="Back to jobs">
+          <span class="material-symbols-rounded">arrow_back</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="prep">
+      <p class="lede">
+        Practice questions for a jewelry sales associate interview. Each question has an answer
+        you can say out loud and change to fit you. Words inside <span class="fill">[brackets]</span>
+        are the parts you should replace with your own details. Tick the circle on a question once
+        you can answer it comfortably without reading.
+      </p>
+
+      <div class="progress-bar">
+        <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+        <span id="progressText" class="progress-text"></span>
+      </div>
+
+      <nav class="navchips">
+        <a href="#about">About you</a>
+        <a href="#customers">Customers &amp; selling</a>
+        <a href="#knowledge">Jewelry knowledge</a>
+        <a href="#store">Working in the store</a>
+        <a href="#ask">Questions to ask them</a>
+        <a href="#checklist">Before you go</a>
+      </nav>
+
+      <p id="noResults" class="no-results" hidden>No questions match that search.</p>
+
+      <!-- ======================================================= ABOUT YOU -->
+      <section id="about">
+        <h2><span class="num">1</span> About you</h2>
+
+        <details class="qa" data-id="q1">
+          <summary><span class="tick"></span><span class="q">Tell me about yourself.</span></summary>
+          <div class="a">
+            <p class="say">
+              “I have <span class="fill">[two]</span> years of experience in retail sales. I enjoy
+              working with customers and helping them find the right thing. I like jewelry because
+              every piece means something to the person who buys it. I am patient, organized, and I
+              pay attention to small details. Now I am looking for a store where I can build
+              long-term relationships with customers.”
+            </p>
+            <p class="tip">
+              Keep it under one minute. Talk about your work, not your family or personal life. This
+              is almost always the first question, so practice it the most.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q2">
+          <summary><span class="tick"></span><span class="q">Why do you want to work with jewelry?</span></summary>
+          <div class="a">
+            <p class="say">
+              “Jewelry is personal. People buy it for weddings, birthdays, and other important
+              moments in their life. I like being a part of those moments. I also enjoy learning
+              about metals, stones, and design, and there is always more to learn.”
+            </p>
+            <p class="tip">Show interest in the product, not only in the paycheck.</p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q3">
+          <summary><span class="tick"></span><span class="q">Why do you want to work at our store?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I visited the store and looked at your website before today. I liked how the staff
+              treated people — friendly, but never pushy. Your brand has a strong reputation for
+              <span class="fill">[quality / design / service]</span>, and I want to work somewhere
+              customers already trust.”
+            </p>
+            <p class="tip">
+              Say one specific thing about <em>this</em> store. Look at their website and walk in
+              once before the interview. This is the question that most people answer badly.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q4">
+          <summary><span class="tick"></span><span class="q">What are your strengths?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I listen well and I am patient. Customers need time when they are spending a lot of
+              money, and I never rush them. I am also reliable — I arrive on time and I finish what
+              I start.”
+            </p>
+            <p class="tip">Pick two or three strengths and give a short example of each.</p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q5">
+          <summary><span class="tick"></span><span class="q">What is your weakness?</span></summary>
+          <div class="a">
+            <p class="say">
+              “In the past I tried to do everything by myself instead of asking for help. I learned
+              that asking a coworker is faster and better for the customer. Now I ask when I am not
+              sure about something.”
+            </p>
+            <p class="tip">
+              Choose a real but small weakness, then say what you are doing to improve. Never say
+              “I work too hard” — interviewers hear that every day.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q6">
+          <summary><span class="tick"></span><span class="q">Why did you leave your last job?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I was ready for a new step. I wanted to work with a product I care about and with
+              customers I can build a relationship with, and this role fits that.”
+            </p>
+            <p class="tip">
+              Stay positive. Never criticize an old manager or store, even if the reason was real.
+              Keep the answer short and move forward.
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <!-- =============================================== CUSTOMERS & SELLING -->
+      <section id="customers">
+        <h2><span class="num">2</span> Customers &amp; selling</h2>
+
+        <details class="qa" data-id="q7">
+          <summary><span class="tick"></span><span class="q">How do you greet a customer who walks in?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I smile and say hello, and then I give them a moment to look around. After that I say
+              something easy like, ‘Let me know if you would like to see anything closer.’ I stay
+              near them so they can ask me a question, but I do not follow them around the store.”
+            </p>
+            <p class="tip">
+              Show that you are warm but not pushy. Customers spending a lot of money dislike
+              pressure more than anything else.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q8">
+          <summary><span class="tick"></span><span class="q">A customer says “I'm just looking.” What do you do?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I say, ‘Of course, take your time.’ Then I step back but stay close. If I see them
+              looking at one case for a while, I might say, ‘That collection is new — would you like
+              to try one on?’ Many people say they are just looking because they expect pressure.”
+            </p>
+            <p class="tip">
+              “Just looking” is not “no.” Your job is to make them comfortable, then open a
+              conversation when they show interest.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q9">
+          <summary><span class="tick"></span><span class="q">A customer says the price is too high. What do you say?</span></summary>
+          <div class="a">
+            <p class="say">
+              “First I listen and I do not argue. Then I explain the value — the quality of the
+              stone, the metal, the work behind the piece, and the warranty. I might say, ‘This is
+              made to last a lifetime, and we service it for free.’ If it is still too much, I show
+              them something similar in a lower price range. I never make anyone feel bad about
+              their budget.”
+            </p>
+            <p class="tip">
+              Do not apologize for the price and do not offer a discount right away. Talk about
+              value first, then offer a different option.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q10">
+          <summary><span class="tick"></span><span class="q">How would you help someone buying an engagement ring?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I ask questions before I show anything. What does she usually wear — yellow gold,
+              white gold, or rose gold? Does she like simple or detailed styles? Do you know her ring
+              size? Do you have a budget in mind? Then I show two or three rings, not twenty. Too
+              many choices make people nervous. I also explain the 4Cs in simple words so he feels
+              confident about his decision.”
+            </p>
+            <p class="tip">
+              These customers are usually nervous and often shopping alone for the first time. Being
+              calm and organized matters more than knowing every technical detail.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q11">
+          <summary><span class="tick"></span><span class="q">Tell me about a time you gave excellent customer service.</span></summary>
+          <div class="a">
+            <p class="say">
+              “A customer came in about <span class="fill">[thirty minutes before closing]</span>
+              looking for a gift. She was stressed and had no idea what to buy. I asked about the
+              person — her age, her style, what she already wears. We found a
+              <span class="fill">[necklace]</span> together and I gift-wrapped it for her. She came
+              back the next month and asked for me by name.”
+            </p>
+            <p class="tip">
+              Use this shape for every story question: <strong>the situation</strong>,
+              <strong>what you did</strong>, <strong>what happened in the end</strong>. Have two real
+              stories ready before the interview.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q12">
+          <summary><span class="tick"></span><span class="q">How do you handle an angry customer?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I stay calm and let them finish talking. I do not interrupt. Then I repeat the problem
+              in my own words so they know I understood. I say I am sorry for the trouble and I
+              explain exactly what I can do. If I cannot fix it myself, I get my manager quickly
+              instead of making the customer wait.”
+            </p>
+            <p class="tip">Never argue. Keep your voice quiet and slow — it calms people down.</p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q13">
+          <summary><span class="tick"></span><span class="q">A customer wants to return a piece after the return period. What do you do?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I explain the policy politely and clearly, without sounding like a rule book. Then I
+              look for another option — an exchange, a repair, a cleaning, or store credit if we
+              allow it. If I am not sure what I can offer, I ask my manager. I want the customer to
+              leave feeling respected, even when the answer is no.”
+            </p>
+            <p class="tip">Show that you follow the rules <em>and</em> protect the relationship.</p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q14">
+          <summary><span class="tick"></span><span class="q">How do you feel about sales goals?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I am comfortable with goals — they help me focus. I try to reach them by taking good
+              care of each customer instead of pushing products. When people trust me, they buy more
+              and they come back later.”
+            </p>
+            <p class="tip">
+              Stores need to know you will not be scared by a target. Say yes clearly, then explain
+              how you reach it.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q15">
+          <summary><span class="tick"></span><span class="q">How would you sell an add-on, like a chain or a care plan?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I connect it to what they already chose. If someone buys a pendant, I say, ‘Would you
+              like to see chains? This length works well with that size.’ For a care plan I keep it
+              simple: ‘This covers cleaning and inspection, so your stones stay tight and safe.’ I
+              offer once. If they say no, I do not ask again.”
+            </p>
+            <p class="tip">“I offer once” is a strong line. It shows confidence without pressure.</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- ================================================ JEWELRY KNOWLEDGE -->
+      <section id="knowledge">
+        <h2><span class="num">3</span> Jewelry knowledge</h2>
+
+        <p class="section-note">
+          You do not need to be an expert on your first day — most stores train you. But knowing the
+          basics shows you are serious.
+        </p>
+
+        <details class="qa" data-id="q16">
+          <summary><span class="tick"></span><span class="q">What do you know about diamonds?</span></summary>
+          <div class="a">
+            <p class="say">
+              “Diamonds are graded by the 4Cs: cut, color, clarity, and carat weight. Cut is about
+              how well the diamond is shaped and polished, and it affects the sparkle the most. Color
+              is graded from D, which is colorless, down through the alphabet. Clarity describes the
+              tiny marks inside the stone. Carat is the weight. I explain these in simple words so
+              customers do not feel confused.”
+            </p>
+
+            <div class="note">
+              <p class="note-title">The 4Cs — memorize these</p>
+              <ul>
+                <li><strong>Cut</strong> — how well it is shaped and polished. Affects sparkle the most.</li>
+                <li><strong>Color</strong> — graded D (colorless, most valuable) through Z (light yellow).</li>
+                <li><strong>Clarity</strong> — the small natural marks inside, called inclusions.</li>
+                <li><strong>Carat</strong> — the weight of the stone, not its size.</li>
+              </ul>
+              <p class="note-foot">
+                If you only remember one line: <em>cut matters most for how a diamond looks.</em>
+              </p>
+            </div>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q17">
+          <summary><span class="tick"></span><span class="q">What is the difference between 14k and 18k gold?</span></summary>
+          <div class="a">
+            <p class="say">
+              “Karat tells you how much pure gold is in the metal. 18k is 75% gold, so the color is
+              richer and it costs more, but it is also softer. 14k is about 58% gold — it is harder,
+              so many people choose it for rings they wear every day.”
+            </p>
+
+            <div class="note">
+              <p class="note-title">Metals in one line each</p>
+              <ul>
+                <li><strong>18k gold</strong> — 75% pure gold. Richer color, softer, more expensive.</li>
+                <li><strong>14k gold</strong> — about 58% pure gold. More durable for daily wear.</li>
+                <li><strong>Sterling silver</strong> — 92.5% silver, usually marked “925”. Tarnishes over time.</li>
+                <li><strong>Platinum</strong> — naturally white, heavier, and usually the most expensive.</li>
+                <li><strong>White gold</strong> — gold plated with rhodium. May need re-plating after a few years.</li>
+              </ul>
+            </div>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q18">
+          <summary><span class="tick"></span><span class="q">Do you know anything about gemstones?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I know the basics. Rubies are red and sapphires are usually blue, and both are types
+              of the same mineral. Emeralds are green and softer, so they need more care. I also know
+              the birthstones, because customers ask about them often when they buy gifts. I am still
+              learning and I read about stones in my own time.”
+            </p>
+            <p class="tip">
+              The last sentence is important. Saying “I am still learning” is much better than
+              guessing and being wrong.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q19">
+          <summary><span class="tick"></span><span class="q">How should customers take care of their jewelry?</span></summary>
+          <div class="a">
+            <p class="say">
+              “For most pieces, warm water with a little mild soap and a soft brush works well. I
+              tell customers to take rings off before cleaning the house, swimming, or going to the
+              gym. Softer stones like pearls, opals, and emeralds need gentler care and no harsh
+              cleaners. I also suggest bringing pieces in once or twice a year so we can check that
+              the stones are still tight.”
+            </p>
+            <p class="tip">
+              That last part is useful in a store — a free check-up brings the customer back through
+              the door.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q20">
+          <summary><span class="tick"></span><span class="q">A customer asks something you do not know. What do you do?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I say honestly, ‘That is a good question — let me check so I give you the right
+              answer.’ Then I ask a coworker or look it up. Customers trust an honest answer more
+              than a fast one, and guessing about a stone or a price can cause a real problem
+              later.”
+            </p>
+            <p class="tip">
+              This is one of the strongest answers you can give in a jewelry interview. Never
+              pretend to know.
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <!-- =============================================== WORKING IN THE STORE -->
+      <section id="store">
+        <h2><span class="num">4</span> Working in the store</h2>
+
+        <details class="qa" data-id="q21">
+          <summary><span class="tick"></span><span class="q">How do you handle expensive items safely?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I follow the store's rules exactly. I take out one piece at a time, keep it in front
+              of me, and lock the case again straight away. I count pieces before and after. When the
+              store is busy I stay aware of who is standing near me. Security is part of the job, not
+              extra work.”
+            </p>
+            <p class="tip">
+              Managers worry about this a lot. A calm, specific answer here is very reassuring.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q22">
+          <summary><span class="tick"></span><span class="q">Can you work weekends and holidays?</span></summary>
+          <div class="a">
+            <p class="say">
+              “Yes. I know weekends are the busiest days, and the holiday season matters most —
+              Christmas, Valentine's Day, and Mother's Day. I am available
+              <span class="fill">[say your real days and hours]</span>.”
+            </p>
+            <p class="tip">
+              Only say yes if it is true. Be honest about your schedule now — a problem later is much
+              worse than an honest answer today.
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q23">
+          <summary><span class="tick"></span><span class="q">How do you work in a team when you share sales or commission?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I help my coworkers and they help me. If I am busy with one customer, I make sure
+              someone greets the next person. If a customer prefers to work with a coworker, that is
+              fine — the store still wins. A store where people fight over customers feels
+              uncomfortable, and customers notice it.”
+            </p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q24">
+          <summary><span class="tick"></span><span class="q">What do you do on a slow day?</span></summary>
+          <div class="a">
+            <p class="say">
+              “I use the time. I clean and organize the displays, check that every piece looks
+              perfect, and study product information. If the store allows it, I follow up with past
+              customers about repairs or new collections. A quiet store should still look ready.”
+            </p>
+            <p class="tip">This answer quietly says: I do not stand around on my phone.</p>
+          </div>
+        </details>
+
+        <details class="qa" data-id="q25">
+          <summary><span class="tick"></span><span class="q">Where do you see yourself in a few years?</span></summary>
+          <div class="a">
+            <p class="say">
+              “First I want to become really good at this job — strong product knowledge, regular
+              customers who come back and ask for me, and steady sales. After that, I would be
+              interested in growing into a senior or supervisor role if the opportunity comes.”
+            </p>
+            <p class="tip">Show ambition, but show you want to master <em>this</em> job first.</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- =============================================== QUESTIONS TO ASK -->
+      <section id="ask">
+        <h2><span class="num">5</span> Questions to ask them</h2>
+
+        <p class="section-note">
+          At the end they will ask, “Do you have any questions for us?” Always say yes and ask two or
+          three. Saying “no” makes you look uninterested.
+        </p>
+
+        <ul class="ask-list">
+          <li>What does a successful first three months look like in this role?</li>
+          <li>What do your best associates do differently from the others?</li>
+          <li>Is there product training, and how does it work?</li>
+          <li>How is a normal day organized here?</li>
+          <li>How does the team handle the busy holiday season?</li>
+          <li>What do you enjoy most about working here?</li>
+          <li>How is commission or bonus structured? <span class="muted-inline">(fine to ask if pay has not been discussed)</span></li>
+          <li>What are the next steps, and when should I expect to hear from you?</li>
+        </ul>
+
+        <p class="tip">
+          Write two of these on a small notepad and bring it. Looking at your notes is normal and
+          looks prepared, not weak.
+        </p>
+      </section>
+
+      <!-- ==================================================== CHECKLIST -->
+      <section id="checklist">
+        <h2><span class="num">6</span> Before you go</h2>
+
+        <div class="cards">
+          <div class="card">
+            <h3>What to wear</h3>
+            <p>
+              Clean, simple, and a little formal — dark colors work well. Wear one or two nice
+              pieces of jewelry, not many. Neat hands and short, clean nails matter in this job,
+              because customers watch your hands all day.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>What to bring</h3>
+            <p>
+              Two printed copies of your resume, a small notepad and pen, and your ID. Arrive ten to
+              fifteen minutes early — never late, and not more than twenty minutes early.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Research the store</h3>
+            <p>
+              Look at their website and social media. Learn roughly what their prices are, what they
+              are best known for, and one collection by name. Walk into the store once as a customer
+              before your interview.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>During the interview</h3>
+            <p>
+              Smile, make eye contact, and give a firm handshake. Speak slowly — it is better than
+              speaking fast. If you do not understand a question, it is fine to say, “Could you say
+              that another way?”
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Useful phrases</h3>
+            <ul class="phrases">
+              <li>“That's a great question — let me check for you.”</li>
+              <li>“Would you like to try it on?”</li>
+              <li>“Take your time, there's no rush.”</li>
+              <li>“May I ask who it's for?”</li>
+              <li>“This one is made to last a lifetime.”</li>
+              <li>“Let me show you two options.”</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>After the interview</h3>
+            <p>
+              Send a short thank-you email the same day or the next morning. Three or four sentences
+              is enough: thank them, say one thing you liked about the store, and say you are
+              interested in the role.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <p class="closing">
+        Practice out loud, not silently — say the answers to a mirror or record yourself on your
+        phone. The goal is not to memorize the words. The goal is to feel calm because you already
+        know roughly what you want to say.
+      </p>
+    </main>
+
+    <script src="js/interview.js"></script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# Logs / local env
+*.log
+.env
+.env.local
+
+# Local data — never commit the job list or the old database
+seed-jobs.json
+jobs-*.json
+*.db
+*.db-wal
+*.db-shm
+
+# Dependency dirs (only if a build step is ever added)
+node_modules/
+dist/

@@ -1,0 +1,370 @@
+﻿/* Interview prep page â€” builds on the shell and variables in styles.css */
+
+.prep {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+.lede {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+
+.fill {
+  background: #fdf3d9;
+  border-bottom: 1px solid #e8d08a;
+  padding: 0 3px;
+  border-radius: 3px;
+  color: #6b551d;
+  font-weight: 550;
+}
+
+/* ---------------------------------------------------------------- progress */
+
+.progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.progress-track {
+  flex: 1;
+  height: 7px;
+  background: #e7e4dc;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------- section nav */
+
+.navchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 30px;
+}
+
+.navchips a {
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  padding: 6px 13px;
+}
+
+.navchips a:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ----------------------------------------------------------------- sections */
+
+.prep section {
+  margin-bottom: 42px;
+  scroll-margin-top: 84px;
+}
+
+.prep h2 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 14px;
+}
+
+.num {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.section-note {
+  color: var(--muted);
+  margin: -4px 0 16px;
+}
+
+.no-results {
+  color: var(--muted);
+  text-align: center;
+  padding: 28px;
+}
+
+/* ------------------------------------------------------------- question card */
+
+.qa {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 9px;
+  overflow: hidden;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.qa[open] {
+  border-color: var(--border-2);
+  box-shadow: var(--shadow-md);
+}
+
+.qa summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.qa summary::-webkit-details-marker {
+  display: none;
+}
+
+.qa summary:hover {
+  background: #fbfaf7;
+}
+
+.q {
+  flex: 1;
+  font-weight: 550;
+  font-size: 15px;
+}
+
+/* chevron */
+.qa summary::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.18s ease;
+  flex: none;
+}
+
+.qa[open] summary::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+/* practised tick */
+.tick {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-2);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.tick:hover {
+  border-color: var(--primary);
+}
+
+.tick::after {
+  content: 'âœ“';
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0;
+  line-height: 1;
+}
+
+.qa.done .tick {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.qa.done .tick::after {
+  opacity: 1;
+}
+
+.qa.done .q {
+  color: var(--muted);
+}
+
+/* ----------------------------------------------------------------- answers */
+
+.a {
+  padding: 2px 16px 16px 48px;
+}
+
+.say {
+  margin: 0 0 12px;
+  padding: 13px 15px;
+  background: var(--primary-soft);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 8px 8px 0;
+  line-height: 1.65;
+}
+
+.tip {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.tip::before {
+  content: 'Tip â€” ';
+  font-weight: 650;
+  color: var(--text);
+}
+
+/* -------------------------------------------------------------- note boxes */
+
+.note {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  background: #fcfbf9;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.note-title {
+  margin: 0 0 9px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.note ul {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.75;
+  font-size: 14px;
+}
+
+.note-foot {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------- questions to ask */
+
+.ask-list {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.ask-list li {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 7px;
+  line-height: 1.5;
+}
+
+.muted-inline {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------------ checklist cards */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px 18px;
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.phrases {
+  margin: 0;
+  padding-left: 17px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.closing {
+  margin: 36px 0 0;
+  padding: 18px 20px;
+  background: var(--primary-soft);
+  border-radius: var(--r-md);
+  line-height: 1.65;
+  color: #1a4d41;
+}
+
+/* ------------------------------------------------------------------- print */
+
+@media print {
+  .topbar,
+  .navchips,
+  .progress-bar,
+  .tick {
+    display: none !important;
+  }
+  .prep {
+    max-width: none;
+    padding: 0;
+  }
+  .qa {
+    break-inside: avoid;
+    border-color: #ccc;
+  }
+  .qa summary::after {
+    display: none;
+  }
+  .a {
+    padding-left: 16px;
+  }
+  details:not([open]) > .a {
+    display: block; /* print every answer, even collapsed ones */
+  }
+}

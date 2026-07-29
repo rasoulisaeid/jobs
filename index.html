@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jobs</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%238b5cf6' d='M11 7V5a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v2h6a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm2 0h6V5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">&#9670;</span>
+      <span class="brand-name">Jobs</span>
+      <span id="jobCount" class="brand-count"></span>
+    </div>
+    <div class="topbar-actions">
+      <span id="syncDot" class="sync-dot" title="Sync status"></span>
+      <a class="icon-btn" href="interview.html" title="Interview prep" aria-label="Interview prep">
+        <span class="material-symbols-rounded">school</span>
+      </a>
+      <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">
+        <span class="material-symbols-rounded">settings</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="view" class="view" aria-live="polite">
+    <!-- ------------------------------------------------------- lock screen -->
+    <section id="lockScreen" class="lock" hidden>
+      <div class="lock-card">
+        <span class="material-symbols-rounded lock-icon">lock</span>
+        <h1 id="lockTitle">Unlock your jobs</h1>
+        <p id="lockText" class="lock-text">
+          Your jobs and API key are encrypted. Enter your password to open them.
+        </p>
+        <form id="lockForm" autocomplete="off">
+          <input id="lockPass" type="password" placeholder="Password" autocomplete="current-password" />
+          <input id="lockPass2" type="password" placeholder="Confirm password" autocomplete="new-password" hidden />
+          <button class="btn primary wide" type="submit">Unlock</button>
+        </form>
+        <p id="lockError" class="lock-error" hidden></p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------- job list -->
+    <section id="jobsScreen" hidden>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="material-symbols-rounded">search</span>
+          <input id="search" type="search" placeholder="Search jobs…" autocomplete="off" />
+        </div>
+        <select id="categoryFilter" aria-label="Filter by category">
+          <option value="">All categories</option>
+        </select>
+        <button id="addBtn" class="btn primary">
+          <span class="material-symbols-rounded">add</span> Add job
+        </button>
+      </div>
+
+      <div id="tableWrap" class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="title">Title</th>
+              <th data-sort="category">Category</th>
+              <th data-sort="company">Company</th>
+              <th data-sort="address">Address</th>
+              <th data-sort="pay">Pay</th>
+              <th data-sort="employmentType">Type</th>
+              <th class="col-tight">Link</th>
+              <th class="col-tight"></th>
+            </tr>
+          </thead>
+          <tbody id="jobsBody"></tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="empty" hidden>
+        <span class="material-symbols-rounded empty-icon">work</span>
+        <p class="empty-title">No jobs yet</p>
+        <p class="empty-sub">Tap <strong>Add job</strong>, paste a description, and Claude fills in the fields.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ------------------------------------------------------------ job modal -->
+  <dialog id="jobModal" class="modal">
+    <form id="jobForm" method="dialog">
+      <div class="modal-head">
+        <h2 id="jobModalTitle">Add job</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <label class="field">
+          <span class="label">Job description</span>
+          <textarea id="description" rows="8" placeholder="Paste the entire job description here…"></textarea>
+        </label>
+
+        <div class="extract-row">
+          <button type="button" id="extractBtn" class="btn primary">
+            <span class="material-symbols-rounded">auto_awesome</span> Extract with Claude
+          </button>
+          <span id="extractStatus" class="status"></span>
+        </div>
+
+        <label class="field">
+          <span class="label">Link</span>
+          <input id="link" type="url" placeholder="https://…" autocomplete="off" />
+        </label>
+
+        <hr class="rule" />
+
+        <div class="grid">
+          <label class="field">
+            <span class="label">Short title</span>
+            <input id="title" type="text" autocomplete="off" />
+          </label>
+
+          <label class="field">
+            <span class="label">Category</span>
+            <div class="with-button">
+              <select id="category"></select>
+              <button type="button" id="newCategoryBtn" class="btn ghost small">New</button>
+            </div>
+          </label>
+
+          <label class="field">
+            <span class="label">Company</span>
+            <input id="company" type="text" autocomplete="off" />
+          </label>
+
+          <label class="field">
+            <span class="label">Address</span>
+            <input id="address" type="text" autocomplete="off" />
+            <span id="addressHint" class="hint"></span>
+          </label>
+
+          <div class="field">
+            <span class="label">Pay</span>
+            <div class="pay-row">
+              <input id="payMin" type="number" step="0.01" placeholder="min" />
+              <span class="dash">–</span>
+              <input id="payMax" type="number" step="0.01" placeholder="max" />
+              <select id="payPeriod">
+                <option value="">unit</option>
+                <option value="hour">/ hour</option>
+                <option value="day">/ day</option>
+                <option value="week">/ week</option>
+                <option value="month">/ month</option>
+                <option value="year">/ year</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="field">
+            <span class="label">Employment type</span>
+            <select id="employmentType">
+              <option value="">—</option>
+              <option>Full-time</option>
+              <option>Part-time</option>
+              <option>Full-time or Part-time</option>
+              <option>Contract</option>
+              <option>Temporary</option>
+              <option>Internship</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" id="deleteBtn" class="btn danger" hidden>Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn primary">Save job</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ------------------------------------------------------- settings modal -->
+  <dialog id="settingsModal" class="modal narrow">
+    <form id="settingsForm" method="dialog">
+      <div class="modal-head">
+        <h2>Settings</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <label class="field">
+          <span class="label">Claude API key</span>
+          <div class="with-button">
+            <input id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off" />
+            <button type="button" id="removeKeyBtn" class="btn ghost small" hidden>Remove</button>
+          </div>
+          <span id="keyStatus" class="hint"></span>
+        </label>
+
+        <label class="field">
+          <span class="label">Model</span>
+          <select id="model"></select>
+          <span id="modelHint" class="hint"></span>
+        </label>
+
+        <label class="field">
+          <span class="label">Thinking effort</span>
+          <select id="effort"></select>
+          <span id="effortHint" class="hint"></span>
+        </label>
+
+        <div class="field">
+          <span class="label">Address lookup</span>
+          <label class="checkbox">
+            <input id="webSearch" type="checkbox" />
+            <span>Search the web for the exact street address</span>
+          </label>
+          <span class="hint">Adds a few seconds and a small per-search cost.</span>
+        </div>
+
+        <div class="field">
+          <span class="label">Categories</span>
+          <div id="categoryList" class="chip-list"></div>
+          <div class="with-button">
+            <input id="newCategoryInput" type="text" placeholder="Add a category…" />
+            <button type="button" id="addCategoryBtn" class="btn ghost small">Add</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label">Backup</span>
+          <div class="btn-row">
+            <button type="button" id="exportBtn" class="btn ghost small">
+              <span class="material-symbols-rounded">download</span> Export JSON
+            </button>
+            <button type="button" id="importBtn" class="btn ghost small">
+              <span class="material-symbols-rounded">upload</span> Import JSON
+            </button>
+            <input id="importFile" type="file" accept="application/json,.json" hidden />
+          </div>
+          <span id="importHint" class="hint">Import merges by id, so running it twice is safe.</span>
+        </div>
+
+        <div class="field">
+          <span class="label">Security</span>
+          <div class="btn-row">
+            <button type="button" id="lockBtn" class="btn ghost small">
+              <span class="material-symbols-rounded">lock</span> Lock now
+            </button>
+            <button type="button" id="changePassBtn" class="btn ghost small">Change password</button>
+          </div>
+          <span class="hint">
+            Everything is encrypted in your browser before it syncs. The password is never stored or sent.
+          </span>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" data-close>Close</button>
+        <button type="submit" class="btn primary">Save settings</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <!-- load order matters: store, sync, vault, then data/extract, then the app -->
+  <script src="js/store.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/vault.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/extract.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
