@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <link rel="stylesheet" href="css/style.css?v=6" />
-  <link rel="stylesheet" href="css/apply.css?v=6" />
+  <link rel="stylesheet" href="css/style.css?v=7" />
+  <link rel="stylesheet" href="css/apply.css?v=7" />
 </head>
 <body>
   <header class="topbar">
@@ -89,7 +89,7 @@
           <ul class="tailor-facts">
             <li>Claude <strong>Opus 5</strong>, high effort — a few cents and up to a minute.</li>
             <li>Sends the posting and this resume. <strong>Your contact details are not included.</strong></li>
-            <li>Nothing is saved or overwritten until you press <strong>Save as version</strong>.</li>
+            <li>The result is saved as a new version automatically — nothing is overwritten.</li>
           </ul>
 
           <div class="toolbar-row">
@@ -176,7 +176,8 @@
         <div class="panel">
           <h3>Versions</h3>
           <p id="versionsEmpty" class="pane-note">
-            Nothing saved yet. Tailor the resume, check it, then <strong>Save as version</strong>.
+            Nothing saved yet. Each tailoring saves a version here, and the next one starts
+            from the newest.
           </p>
           <ul id="versionList" class="versions"></ul>
         </div>
@@ -184,9 +185,10 @@
         <div class="panel">
           <h3>Where this lives</h3>
           <p class="pane-note">
-            The resume, its versions and the contact details are stored in
-            <strong>this browser only</strong>. Nothing here syncs — the database is readable by
-            anyone who has the URL, and that URL is in a public repo.
+            The resume and its versions <strong>sync</strong>, so they follow you to any device.
+            They are stored with <code>CITY, STATE ZIP</code> / <code>PHONE NUMBER</code> /
+            <code>EMAIL ADDRESS</code> still in place — your real details are kept separately on
+            this device and only filled in when something is shown, printed or exported.
           </p>
           <button id="resetBtn" class="btn ghost small">Reset to the shipped resume</button>
         </div>
@@ -196,13 +198,13 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="js/store.js?v=6"></script>
-  <script src="js/sync.js?v=6"></script>
-  <script src="js/ui.js?v=6"></script>
-  <script src="js/data.js?v=6"></script>
-  <script src="js/resume.js?v=6"></script>
-  <script src="js/latex-render.js?v=6"></script>
-  <script src="js/tailor.js?v=6"></script>
-  <script src="js/apply.js?v=6"></script>
+  <script src="js/store.js?v=7"></script>
+  <script src="js/sync.js?v=7"></script>
+  <script src="js/ui.js?v=7"></script>
+  <script src="js/data.js?v=7"></script>
+  <script src="js/resume.js?v=7"></script>
+  <script src="js/latex-render.js?v=7"></script>
+  <script src="js/tailor.js?v=7"></script>
+  <script src="js/apply.js?v=7"></script>
 </body>
 </html>

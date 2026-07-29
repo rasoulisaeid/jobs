@@ -58,10 +58,12 @@ invent an employer, date, skill or qualification; if the posting wants something
 she doesn't have, it says so in the change list instead of papering over it.
 Read it before saving — it is a language model writing a factual document.
 
-**Save as version** keeps a copy against that job. **Print / Save as PDF** is the
-quickest route to an attachment; **Overleaf** typesets the real LaTeX (and
-uploads the resume to a third party to do it). `Edit the LaTeX source` opens the
-source if it needs a hand edit.
+Each result is saved as a version against that job (`v1`, `v2`, …) and syncs, so
+re-opening the page picks up the newest and the next tailoring builds on it
+rather than starting from the default. **Save as version** snapshots a manual
+edit. **Print / Save as PDF** is the quickest route to an attachment;
+**Overleaf** typesets the real LaTeX (and uploads the resume to a third party to
+do it). `Edit the LaTeX source` opens the source if it needs a hand edit.
 
 ### Interview prep
 
@@ -82,24 +84,32 @@ browser  ──►  localStorage  ──mirror──►  Firebase RTDB /jobs/ras
 | `jobs:v1:jobs` | every job record, including the pasted description | yes |
 | `jobs:v1:categories` | your category list | yes |
 | `jobs:v1:prefs` | model, thinking effort, address-lookup toggle | yes |
+| `jobs:v1:resume` | the resume LaTeX, contact line placeheld | yes |
+| `jobs:v1:resumeVersions` | resumes tailored per job | yes |
 | `jobs:local:apiKey` | the Claude API key | **no — this device only** |
-| `jobs:local:resume` | the resume LaTeX | **no — this device only** |
-| `jobs:local:resumeVersions` | resumes tailored per job | **no — this device only** |
+| `jobs:local:contact` | real address, phone, email | **no — this device only** |
 
-The Firebase node is readable without auth. Job postings are public listings, so
-they go up as-is. Two things must not, so they are kept outside the synced
-namespace entirely — `Store.dump()` never sees them and an incoming sync never
-overwrites them:
+The Firebase node is readable without auth, and this repo is public *including
+the database URL in `js/sync.js`* — so anyone reading the repo could fetch it.
+Job postings are public listings and go up as-is. The resume does too, but only
+because of the split that makes it safe:
 
-- **The API key.** Self-explanatory.
-- **The resume.** It carries a home city, a phone number and a personal email,
-  and this repo is public *including the database URL in `js/sync.js`* — anyone
-  reading the repo could fetch the node.
+```
+Store  resume / resumeVersions  ->  LaTeX with CITY, STATE ZIP · PHONE NUMBER · EMAIL ADDRESS
+local  jobs:local:contact       ->  the real address, phone and email
+```
 
-The cost is that neither follows her to a second device; both are entered once
-per browser. `js/resume.js` ships the resume with the contact line placeheld
-(`CITY, STATE ZIP` / `PHONE NUMBER` / `EMAIL ADDRESS`) for the same reason, and
-the app nags until they're replaced. The filled-in `resume.tex` is gitignored.
+The placeholders are only filled in on the way *out* — preview, print, download,
+copy, Overleaf — by `applyContact()`. `redact()` is the inverse and runs on
+everything heading into `Store`, so typing the real details straight into the
+LaTeX source still cannot publish them. A useful side effect: the copy sent to
+Claude for tailoring is the placeholder one, so no contact detail is in that
+request either.
+
+What does sync is her name, work history and education — public-CV material.
+The API key and the contact details never leave the browser they were typed
+into, which means both are entered once per device. The filled-in `resume.tex`
+is gitignored.
 
 Changes sync live between devices over SSE; edits made offline are saved locally
 and pushed when the connection returns. The dot in the top bar is grey offline,

@@ -1,23 +1,29 @@
 /* Resume — the base LaTeX CV plus the tailored versions made from it.
  *
- * Deliberately NOT in Store, so none of this syncs to Firebase. A resume holds
- * a home address, a phone number and a personal email, and this repo is public
- * — including js/sync.js, which spells out the database URL. Anyone reading the
- * repo could fetch the node. So the resume lives in this browser only, next to
- * the API key.
+ * The documents go through Store, so they sync to Firebase and follow her to
+ * any device. That is only safe because of the split below:
  *
- * The cost is real: nothing here follows her to a second device. Flipping to
- * synced is a small change (swap the localStorage calls for window.Store), but
- * it publishes the contact details, so it should be a deliberate decision.
+ *   Store  "resume" / "resumeVersions"  ->  LaTeX holding PLACEHOLDER tokens
+ *   local  "jobs:local:contact"         ->  the real address, phone and email
  *
- * For the same reason DEFAULT_LATEX ships with the contact line placeheld. Her
- * real details are typed in once and never leave the machine except when she
- * chooses to send a resume to Claude or to Overleaf.
+ * The Firebase node is readable by anyone with the URL, and the URL is in a
+ * public repo — so nothing that reaches Store may carry contact details. The
+ * placeholders are only filled in on the way out, by applyContact(), for the
+ * preview, the printer and exports. redact() is the belt-and-braces: anything
+ * heading into Store gets the real values swapped back out first, so hand-typing
+ * them into the source still cannot publish them.
+ *
+ * What does sync is her name, work history and education — public-CV material,
+ * the same order of exposure as the job list already up there.
  */
 (function () {
-  const CELL = "jobs:local:resume";
-  const CELL_VERSIONS = "jobs:local:resumeVersions";
-  const CELL_CONTACT = "jobs:local:contact";
+  const KEY_BASE = "resume";              // via Store -> synced
+  const KEY_VERSIONS = "resumeVersions";  // via Store -> synced
+  const CELL_CONTACT = "jobs:local:contact";  // this device only, never synced
+
+  // Where the documents lived before they synced; drained by migrateLocal().
+  const OLD_BASE = "jobs:local:resume";
+  const OLD_VERSIONS = "jobs:local:resumeVersions";
 
   // String.raw is required, not stylistic: "\usepackage" is an invalid unicode
   // escape and a plain template literal would refuse to parse.
@@ -106,15 +112,18 @@ Bachelor of Arts, Archaeology
 
   /* ------------------------------------------------------------------- base */
 
-  const getBase = () => readCell(CELL, DEFAULT_LATEX);
+  function getBase() {
+    const saved = window.Store.get(KEY_BASE, null);
+    return typeof saved === "string" && saved.trim() ? saved : DEFAULT_LATEX;
+  }
 
   function setBase(latex) {
-    writeCell(CELL, String(latex || ""));
+    window.Store.set(KEY_BASE, redact(String(latex || "")));
     notify();
   }
 
   function resetBase() {
-    try { localStorage.removeItem(CELL); } catch (e) {}
+    window.Store.del(KEY_BASE);
     notify();
     return DEFAULT_LATEX;
   }
@@ -152,6 +161,21 @@ Bachelor of Arts, Archaeology
       .replace(/\^/g, "\\textasciicircum{}");
   }
 
+  /* The inverse of applyContact: puts the placeholders back. Everything on its
+   * way into Store passes through here, so real contact details cannot reach
+   * Firebase even if they were typed straight into the LaTeX source. */
+  function redact(latex) {
+    const details = getContact();
+    let out = String(latex || "");
+    for (const f of FIELDS) {
+      const value = details[f];
+      if (!value) continue;
+      out = out.split(escapeLatex(value)).join(PLACEHOLDERS[f]);  // as stored
+      out = out.split(value).join(PLACEHOLDERS[f]);               // as typed
+    }
+    return out;
+  }
+
   // Swaps the placeholder tokens for the saved details. Everything the user
   // ever sees or sends goes through this.
   function applyContact(latex, contact) {
@@ -175,9 +199,11 @@ Bachelor of Arts, Archaeology
   const newId = () => "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
   function allVersions() {
-    const list = readCell(CELL_VERSIONS, []);
+    const list = window.Store.get(KEY_VERSIONS, []);
     return Array.isArray(list) ? list : [];
   }
+
+  const writeVersions = (list) => window.Store.set(KEY_VERSIONS, list);
 
   // jobId undefined -> every version; null -> the ones not tied to a job.
   function listVersions(jobId) {
@@ -188,22 +214,26 @@ Bachelor of Arts, Archaeology
 
   const getVersion = (id) => allVersions().find((v) => v.id === id) || null;
 
-  function saveVersion({ jobId = null, label = "", latex = "", changes = [] }) {
+  function saveVersion({ jobId = null, label = "", latex = "", changes = [], source = "manual" }) {
     const version = {
       id: newId(),
       jobId: jobId || null,
       label: String(label || "").trim() || "Untitled version",
-      latex: String(latex || ""),
+      latex: redact(String(latex || "")),
       changes: Array.isArray(changes) ? changes : [],
+      source,                                   // "claude" | "manual"
       createdAt: new Date().toISOString(),
     };
-    writeCell(CELL_VERSIONS, [version, ...allVersions()]);
+    writeVersions([version, ...allVersions()]);
     notify();
     return version;
   }
 
+  // The newest version for a job — what the next tailoring should build on.
+  const latestVersion = (jobId) => listVersions(jobId || null)[0] || null;
+
   function deleteVersion(id) {
-    writeCell(CELL_VERSIONS, allVersions().filter((v) => v.id !== id));
+    writeVersions(allVersions().filter((v) => v.id !== id));
     notify();
   }
 
@@ -212,15 +242,51 @@ Bachelor of Arts, Archaeology
     const at = list.findIndex((v) => v.id === id);
     if (at < 0) return;
     list[at] = { ...list[at], label: String(label || "").trim() || list[at].label };
-    writeCell(CELL_VERSIONS, list);
+    writeVersions(list);
     notify();
+  }
+
+  /* ------------------------------------------------------------- migration */
+
+  /* Drains the pre-sync localStorage cells into Store, once. Runs after the
+   * first Firebase pull so a device that already has remote data merges into
+   * it rather than overwriting it. */
+  function migrateLocal() {
+    let moved = 0;
+    try {
+      const oldBase = localStorage.getItem(OLD_BASE);
+      if (oldBase !== null) {
+        const text = JSON.parse(oldBase);
+        if (typeof text === "string" && text.trim() && window.Store.get(KEY_BASE, null) === null) {
+          window.Store.set(KEY_BASE, redact(text));
+          moved++;
+        }
+        localStorage.removeItem(OLD_BASE);
+      }
+
+      const oldVersions = localStorage.getItem(OLD_VERSIONS);
+      if (oldVersions !== null) {
+        const incoming = JSON.parse(oldVersions);
+        if (Array.isArray(incoming) && incoming.length) {
+          const existing = allVersions();
+          const seen = new Set(existing.map((v) => v.id));
+          const fresh = incoming
+            .filter((v) => v && v.id && !seen.has(v.id))
+            .map((v) => ({ ...v, latex: redact(v.latex) }));
+          if (fresh.length) { writeVersions([...fresh, ...existing]); moved += fresh.length; }
+        }
+        localStorage.removeItem(OLD_VERSIONS);
+      }
+    } catch (e) { console.warn("Resume: migration skipped —", e.message); }
+    if (moved) notify();
+    return moved;
   }
 
   window.Resume = {
     DEFAULT_LATEX, PLACEHOLDERS, FIELDS,
     getBase, setBase, resetBase,
-    getContact, setContact, hasContact, applyContact, needsContactDetails, escapeLatex,
-    listVersions, getVersion, saveVersion, deleteVersion, renameVersion,
-    onChange,
+    getContact, setContact, hasContact, applyContact, redact, needsContactDetails, escapeLatex,
+    listVersions, latestVersion, getVersion, saveVersion, deleteVersion, renameVersion,
+    migrateLocal, onChange,
   };
 })();

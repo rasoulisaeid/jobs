@@ -201,6 +201,13 @@
     node.className = `status ${kind}`;
   }
 
+  // "v3 — Jul 29" — the number counts what already exists for this job.
+  function nextVersionLabel() {
+    const n = window.Resume.listVersions(jobId || null).length + 1;
+    const when = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return `v${n} — ${when}`;
+  }
+
   function openTailorPanel() {
     $("tailorTarget").textContent = job
       ? `Tailor for ${job.title || "this role"}${job.company ? ` at ${job.company}` : ""}`
@@ -224,9 +231,20 @@
 
     try {
       const result = await window.Tailor.tailor(job, $("latex").value, $("tailorNotes").value);
-      loadIntoEditor(result.latex, null);
+
+      // Saved straight away, so it syncs and the next tailoring builds on it
+      // rather than starting over from the default.
+      const saved = window.Resume.saveVersion({
+        jobId: jobId || null,
+        label: nextVersionLabel(),
+        latex: result.latex,
+        changes: result.changes,
+        source: "claude",
+      });
+
+      loadIntoEditor(result.latex, saved.id);
       renderChanges(result.changes);
-      setStatus("Done — read it through before you save it.", "ok");
+      setStatus(`Saved as “${saved.label}”. Read it through — edit freely, it will sync.`, "ok");
     } catch (e) {
       setStatus(e.message, "error");
     } finally {
@@ -378,6 +396,7 @@
   (async function init() {
     await window.Sync.ready;
     await window.Data.load();
+    window.Resume.migrateLocal();   // drain the pre-sync cells, once
 
     if (jobId) {
       job = window.Data.listJobs().find((j) => j.id === jobId) || null;
@@ -387,6 +406,26 @@
     }
     renderJob();
     loadContactForm();
-    loadIntoEditor(window.Resume.getBase(), null);
+    openLatestOrBase();
   })();
+
+  // Pick up where she left off: the newest version for this job if there is
+  // one, otherwise the default resume.
+  function openLatestOrBase() {
+    const latest = window.Resume.latestVersion(jobId || null);
+    if (latest) {
+      loadIntoEditor(latest.latex, latest.id);
+      renderChanges(latest.changes || []);
+      $("editorState").textContent = latest.label;
+    } else {
+      loadIntoEditor(window.Resume.getBase(), null);
+    }
+  }
+
+  // A sync from another device replaces the store wholesale.
+  window.addEventListener("jobs-synced", () => {
+    if (isDirty()) { toast("Newer resume arrived from another device — your edits are still here"); return; }
+    renderVersions();
+    if (!activeVersionId) openLatestOrBase();
+  });
 })();
