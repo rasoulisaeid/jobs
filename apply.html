@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <link rel="stylesheet" href="css/style.css?v=10" />
-  <link rel="stylesheet" href="css/apply.css?v=10" />
+  <link rel="stylesheet" href="css/style.css?v=11" />
+  <link rel="stylesheet" href="css/apply.css?v=11" />
 </head>
 <body>
   <header class="topbar">
@@ -53,9 +53,13 @@
     <div class="apply-grid">
       <section class="editor-pane">
         <div class="pane-head">
-          <h2 id="editorTitle">Resume</h2>
+          <div id="docTabs" class="doc-tabs" role="tablist">
+            <button id="tabResume" class="doc-tab is-on" type="button" role="tab">Resume</button>
+            <button id="tabCover" class="doc-tab" type="button" role="tab">Cover letter</button>
+          </div>
           <span id="editorState" class="pane-note"></span>
         </div>
+        <h2 id="editorTitle" class="sr-only">Resume</h2>
 
         <p id="contactWarn" class="banner warn" hidden>
           The contact line is still showing placeholder text. Fill in
@@ -65,7 +69,8 @@
 
         <div class="toolbar-row">
           <button id="tailorBtn" class="btn primary">
-            <span class="material-symbols-rounded">auto_awesome</span> Tailor for this job
+            <span class="material-symbols-rounded">auto_awesome</span>
+            <span id="tailorBtnLabel">Tailor for this job</span>
           </button>
           <button id="saveVersionBtn" class="btn ghost small">
             <span class="material-symbols-rounded">bookmark_add</span> Save as version
@@ -215,13 +220,14 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="js/store.js?v=10"></script>
-  <script src="js/sync.js?v=10"></script>
-  <script src="js/ui.js?v=10"></script>
-  <script src="js/data.js?v=10"></script>
-  <script src="js/resume.js?v=10"></script>
-  <script src="js/latex-render.js?v=10"></script>
-  <script src="js/tailor.js?v=10"></script>
-  <script src="js/apply.js?v=10"></script>
+  <script src="js/store.js?v=11"></script>
+  <script src="js/sync.js?v=11"></script>
+  <script src="js/ui.js?v=11"></script>
+  <script src="js/data.js?v=11"></script>
+  <script src="js/resume.js?v=11"></script>
+  <script src="js/cover.js?v=11"></script>
+  <script src="js/latex-render.js?v=11"></script>
+  <script src="js/tailor.js?v=11"></script>
+  <script src="js/apply.js?v=11"></script>
 </body>
 </html>

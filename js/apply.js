@@ -11,6 +11,13 @@
   let activeVersionId = null;   // which saved version is loaded, if any
   let loadedText = "";          // what the textarea held when it was last loaded
 
+  /* Resume and Cover expose the same API, so everything below — preview, inline
+   * editing, autosave, versions, print, export — works on whichever is open
+   * without being written twice. */
+  let docKind = "resume";
+  const doc = () => (docKind === "cover" ? window.Cover : window.Resume);
+  const isCover = () => docKind === "cover";
+
   const PERIOD_LABEL = { hour: "hr", day: "day", week: "wk", month: "mo", year: "yr" };
 
   const formatMoney = (n) => (n % 1 === 0 ? n.toLocaleString("en-US") : n.toFixed(2));
@@ -58,6 +65,9 @@
       $("editorTitle").textContent = "Default resume";
       $("tailorBtn").hidden = true;
       $("saveBaseBtn").hidden = false;
+      // A letter has to be addressed to a company, so it needs a job.
+      $("tabCover").hidden = true;
+      $("docTabs").hidden = true;
       return;
     }
 
@@ -136,15 +146,15 @@
 
     const latex = $("latex").value;
     try {
-      if (activeVersionId && window.Resume.getVersion(activeVersionId)) {
-        window.Resume.updateVersion(activeVersionId, latex);
+      if (activeVersionId && doc().getVersion(activeVersionId)) {
+        doc().updateVersion(activeVersionId, latex);
       } else if (jobId) {
         const when = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
-        activeVersionId = window.Resume.saveVersion({
+        activeVersionId = doc().saveVersion({
           jobId, label: `Edited — ${when}`, latex, source: "manual",
         }).id;
       } else {
-        window.Resume.setBase(latex);
+        doc().setBase(latex);
       }
       loadedText = latex;
       renderVersions();
@@ -156,7 +166,7 @@
   }
 
   function setSaveState(text) {
-    const version = activeVersionId ? window.Resume.getVersion(activeVersionId) : null;
+    const version = activeVersionId ? doc().getVersion(activeVersionId) : null;
     $("editorState").textContent = version ? `${version.label} · ${text}` : text;
   }
 
@@ -269,7 +279,7 @@
   });
 
   function renderEditorState() {
-    const version = activeVersionId ? window.Resume.getVersion(activeVersionId) : null;
+    const version = activeVersionId ? doc().getVersion(activeVersionId) : null;
     if (!savePending) {
       $("editorState").textContent = version ? `${version.label} · Saved` : "Default resume";
     }
@@ -280,7 +290,7 @@
   }
 
   function renderVersions() {
-    const versions = window.Resume.listVersions(jobId || null);
+    const versions = doc().listVersions(jobId || null);
     const list = $("versionList");
     list.replaceChildren();
     $("versionsEmpty").hidden = versions.length > 0;
@@ -309,7 +319,7 @@
           type: "button", title: `Delete “${version.label}”`, "aria-label": "Delete version",
           onclick: () => {
             if (!confirm(`Delete “${version.label}”?`)) return;
-            window.Resume.deleteVersion(version.id);
+            doc().deleteVersion(version.id);
             if (activeVersionId === version.id) activeVersionId = null;
             renderVersions();
             renderEditorState();
@@ -350,15 +360,16 @@
 
   // "v3 — Jul 29" — the number counts what already exists for this job.
   function nextVersionLabel(minimal) {
-    const n = window.Resume.listVersions(jobId || null).length + 1;
+    const n = doc().listVersions(jobId || null).length + 1;
     const when = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    return `v${n}${minimal ? " tweak" : ""} — ${when}`;
+    return `${isCover() ? "Letter " : ""}v${n}${minimal ? " tweak" : ""} — ${when}`;
   }
 
   function openTailorPanel() {
-    $("tailorTarget").textContent = job
-      ? `Tailor for ${job.title || "this role"}${job.company ? ` at ${job.company}` : ""}`
-      : "Make a new version of the default resume";
+    const where = `${job?.title || "this role"}${job?.company ? ` at ${job.company}` : ""}`;
+    $("tailorTarget").textContent = !job
+      ? "Make a new version of the default resume"
+      : isCover() ? `Write a cover letter for ${where}` : `Tailor for ${where}`;
     $("tailorPanel").hidden = false;
     $("tailorBtn").disabled = true;
     setStatus("");
@@ -379,11 +390,16 @@
 
     const minimal = $("tailorMinimal").checked;
     try {
-      const result = await window.Tailor.tailor(job, $("latex").value, $("tailorNotes").value, { minimal });
+      const result = isCover()
+        ? await window.Tailor.cover(
+            job,
+            window.Resume.latestVersion(jobId || null)?.latex || window.Resume.getBase(),
+            $("latex").value, $("tailorNotes").value, { minimal })
+        : await window.Tailor.tailor(job, $("latex").value, $("tailorNotes").value, { minimal });
 
       // Saved straight away, so it syncs and the next tailoring builds on it
       // rather than starting over from the default.
-      const saved = window.Resume.saveVersion({
+      const saved = doc().saveVersion({
         jobId: jobId || null,
         label: nextVersionLabel(minimal),
         latex: result.latex,
@@ -416,7 +432,7 @@
   /* -------------------------------------------------------------- exports */
 
   function fileName(extension) {
-    const who = "resume";
+    const who = isCover() ? "cover-letter" : "resume";
     const what = job ? slug(`${job.company || ""} ${job.title || ""}`) : "default";
     return `${who}${what ? "-" + what : ""}.${extension}`;
   }
@@ -478,7 +494,7 @@
       : `Version — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
     const label = prompt("Name this version:", suggested);
     if (label === null) return;
-    const saved = window.Resume.saveVersion({
+    const saved = doc().saveVersion({
       jobId: jobId || null,
       label,
       latex: $("latex").value,
@@ -490,14 +506,15 @@
 
   $("saveBaseBtn").addEventListener("click", () => {
     if (!confirm("Replace the default resume with what is in the box?\n\nEvery future tailoring starts from this.")) return;
-    window.Resume.setBase($("latex").value);
+    doc().setBase($("latex").value);
     loadIntoEditor($("latex").value, null);
     toast("Default resume updated");
   });
 
   $("resetBtn").addEventListener("click", () => {
-    if (!confirm("Throw away the saved default and go back to the resume the app shipped with?\n\nSaved versions are kept.")) return;
-    loadIntoEditor(window.Resume.resetBase(), null);
+    const what = isCover() ? "cover letter" : "resume";
+    if (!confirm(`Throw away the saved default ${what} and go back to the one the app shipped with?\n\nSaved versions are kept.`)) return;
+    loadIntoEditor(doc().resetBase(), null);
     renderChanges([]);
     toast("Reset to the shipped resume");
   });
@@ -579,17 +596,45 @@
   })();
 
   // Pick up where she left off: the newest version for this job if there is
-  // one, otherwise the default resume.
+  // one, otherwise the starting document.
   function openLatestOrBase() {
-    const latest = window.Resume.latestVersion(jobId || null);
+    const latest = doc().latestVersion(jobId || null);
     if (latest) {
       loadIntoEditor(latest.latex, latest.id);
       renderChanges(latest.changes || []);
       $("editorState").textContent = latest.label;
     } else {
-      loadIntoEditor(window.Resume.getBase(), null);
+      loadIntoEditor(doc().getBase(), null);
+      renderChanges([]);
     }
   }
+
+  /* ------------------------------------------------- resume / cover letter */
+
+  function switchDoc(kind) {
+    if (kind === docKind) return;
+    saveNow();                       // whatever is open is already safe
+    docKind = kind;
+    activeVersionId = null;
+    editing = null;
+    setStatus("");
+
+    $("tabResume").classList.toggle("is-on", !isCover());
+    $("tabCover").classList.toggle("is-on", isCover());
+    $("editorTitle").textContent = isCover() ? "Cover letter" : "Resume";
+    $("tailorBtnLabel").textContent = isCover() ? "Write the letter" : "Tailor for this job";
+    $("resetBtn").textContent = isCover()
+      ? "Reset to the blank letter"
+      : "Reset to the shipped resume";
+
+    openLatestOrBase();
+    if (isCover() && window.Cover.isTemplate($("latex").value)) {
+      setStatus("This is the blank letter. Press “Write the letter” and Claude drafts it from the posting.");
+    }
+  }
+
+  $("tabResume").addEventListener("click", () => switchDoc("resume"));
+  $("tabCover").addEventListener("click", () => switchDoc("cover"));
 
   // A sync from another device replaces the store wholesale.
   window.addEventListener("jobs-synced", () => {

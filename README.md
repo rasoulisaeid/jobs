@@ -58,6 +58,19 @@ invent an employer, date, skill or qualification; if the posting wants something
 she doesn't have, it says so in the change list instead of papering over it.
 Read it before saving — it is a language model writing a factual document.
 
+**Cover letter** is the other tab on the same page. Claude drafts it from the
+posting and the current resume — three paragraphs, short sentences, ordinary
+words, and a long list of things it must not sound like ("I am writing to
+express my interest", "leverage", "passionate about", rhetorical em dashes,
+flattery that would fit any company). She has to sound like this letter in the
+interview, so it is written to be sayable. It gets its own versions, editing and
+PDF, and refuses to run without a job to be addressed to.
+
+Both tabs share one pipeline: the same LaTeX, renderer, inline editing,
+autosave, versions and print path. **Only do what I asked** switches either one
+from a rewrite to a targeted edit, and the result reports how many lines
+actually moved.
+
 Each result is saved as a version against that job (`v1`, `v2`, …) and syncs, so
 re-opening the page picks up the newest and the next tailoring builds on it
 rather than starting from the default. **Save as version** snapshots a manual
@@ -86,6 +99,8 @@ browser  ──►  localStorage  ──mirror──►  Firebase RTDB /jobs/ras
 | `jobs:v1:prefs` | model, thinking effort, address-lookup toggle | yes |
 | `jobs:v1:resume` | the resume LaTeX, contact line placeheld | yes |
 | `jobs:v1:resumeVersions` | resumes tailored per job | yes |
+| `jobs:v1:coverBase` | the blank cover letter | yes |
+| `jobs:v1:coverVersions` | cover letters written per job | yes |
 | `jobs:local:apiKey` | the Claude API key | **no — this device only** |
 | `jobs:local:contact` | real address, phone, email | **no — this device only** |
 
@@ -141,9 +156,10 @@ js/sync.js          Firebase RTDB mirror (REST + SSE)
 js/ui.js            el() / clear() DOM helpers
 js/data.js          jobs model
 js/extract.js       Claude API call + extraction schema
-js/resume.js        resume + versions (device-local)
-js/latex-render.js  the LaTeX subset -> HTML preview
-js/tailor.js        resume tailoring (Opus 5, high effort)
+js/resume.js        resume + versions
+js/cover.js         cover letters, same API so apply.js shares one path
+js/latex-render.js  LaTeX subset -> HTML, with source offsets for inline editing
+js/tailor.js        tailoring + letter writing (Opus 5, high effort)
 js/app.js           dashboard wiring
 js/apply.js         apply page wiring
 js/interview.js     interview page logic
