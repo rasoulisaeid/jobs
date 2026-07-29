@@ -58,6 +58,7 @@
       employmentType: (job.employmentType || "") || null,
       link: (job.link || "").trim(),
       description: (job.description || "").trim(),
+      applied: Boolean(job.applied),
       createdAt: job.createdAt || new Date().toISOString(),
     };
 
@@ -73,6 +74,15 @@
 
   async function deleteJob(id) {
     jobs = jobs.filter((j) => j.id !== id);
+    window.Store.set("jobs", jobs);
+    notify();
+  }
+
+  // Ticked by hand once the application actually goes in.
+  async function setApplied(id, applied) {
+    const at = jobs.findIndex((j) => j.id === id);
+    if (at < 0) return;
+    jobs[at] = { ...jobs[at], applied: Boolean(applied) };
     window.Store.set("jobs", jobs);
     notify();
   }
@@ -168,6 +178,7 @@
         employmentType: raw.employmentType || null,
         link: raw.link || "",
         description: raw.description || "",
+        applied: Boolean(raw.applied),
         createdAt: raw.createdAt || new Date().toISOString(),
       });
       added++;
@@ -186,7 +197,7 @@
 
   window.Data = {
     load, isLoaded, onChange,
-    listJobs, saveJob, deleteJob,
+    listJobs, saveJob, deleteJob, setApplied,
     listCategories, addCategory, removeCategory,
     getApiKey, hasApiKey, keyPreview, setApiKey,
     getPrefs, setPrefs,

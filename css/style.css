@@ -223,6 +223,16 @@ td a:hover { text-decoration: underline; }
 .row-apply .material-symbols-rounded { font-size: 17px; }
 .row-apply:hover { background: var(--primary); color: #fff; }
 
+/* Applied, but still the way in to the resume and letter for that job. */
+.row-apply.is-applied { background: #dcfce7; color: #166534; }
+.row-apply.is-applied:hover { background: var(--green-dark); color: #fff; }
+
+.cell-applied { text-align: center; }
+.cell-applied input {
+  width: 18px; height: 18px; padding: 0; margin: 0;
+  accent-color: var(--green-dark); cursor: pointer;
+}
+
 /* ── empty state ────────────────────────────────────── */
 
 .empty { text-align: center; padding: 70px 24px; color: var(--muted); }

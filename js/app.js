@@ -63,6 +63,9 @@
       if (key === "pay") {
         av = a.payMin ?? a.payMax ?? -Infinity;
         bv = b.payMin ?? b.payMax ?? -Infinity;
+      } else if (key === "applied") {
+        av = a.applied ? 1 : 0;              // booleans have no toLowerCase
+        bv = b.applied ? 1 : 0;
       } else if (key === "createdAt") {
         av = a.createdAt || ""; bv = b.createdAt || "";
       } else {
@@ -104,11 +107,27 @@
           : null),
         el("td", { class: "col-tight" },
           el("a", {
-            class: "row-apply", href: `apply.html?job=${encodeURIComponent(job.id)}`,
-            title: `Prepare a resume for ${job.title || "this job"}`,
-          }, el("span", { class: "material-symbols-rounded", text: "description" }), "Apply")),
+            class: `row-apply${job.applied ? " is-applied" : ""}`,
+            href: `apply.html?job=${encodeURIComponent(job.id)}`,
+            title: job.applied
+              ? `Applied — open the resume and letter for ${job.title || "this job"}`
+              : `Prepare a resume for ${job.title || "this job"}`,
+          },
+            el("span", {
+              class: "material-symbols-rounded",
+              text: job.applied ? "task_alt" : "description",
+            }),
+            job.applied ? "Applied" : "Apply")),
         el("td", { class: "col-tight" },
           el("button", { class: "row-edit", type: "button", text: "Edit", onclick: () => openJobModal(job) })),
+        el("td", { class: "col-tight cell-applied" },
+          el("input", {
+            type: "checkbox",
+            checked: job.applied || null,
+            "aria-label": `Mark ${job.title || "this job"} as applied`,
+            title: job.applied ? "Applied — untick to undo" : "Tick once you have applied",
+            onchange: (event) => window.Data.setApplied(job.id, event.target.checked),
+          })),
       ));
     }
 
