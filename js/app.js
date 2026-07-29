@@ -1,4 +1,4 @@
-/* App — the jobs dashboard. Waits for Firebase, gates on the vault, renders. */
+/* App — the jobs dashboard. Waits for Firebase, then renders. */
 (function () {
   const $ = (id) => document.getElementById(id);
   const { el } = window.UI;
@@ -42,64 +42,6 @@
 
   const mapsUrl = (address) =>
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-
-  /* --------------------------------------------------------------- gating */
-
-  function renderGate() {
-    const hasPassword = window.Vault.hasPassword();
-    const unlocked = window.Vault.isUnlocked();
-
-    $("lockScreen").hidden = unlocked;
-    $("jobsScreen").hidden = !unlocked;
-
-    if (!unlocked) {
-      $("lockTitle").textContent = hasPassword ? "Unlock your jobs" : "Choose a password";
-      $("lockText").textContent = hasPassword
-        ? "Your jobs and API key are encrypted. Enter your password to open them."
-        : "This password encrypts everything before it syncs. It is never stored or sent — if you lose it, the data cannot be recovered.";
-      $("lockPass2").hidden = hasPassword;
-      $("lockForm").querySelector("button").textContent = hasPassword ? "Unlock" : "Set password";
-      $("lockError").hidden = true;
-      $("lockPass").value = "";
-      $("lockPass2").value = "";
-      setTimeout(() => $("lockPass").focus(), 50);
-    }
-  }
-
-  $("lockForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const pass = $("lockPass").value;
-    const error = $("lockError");
-    error.hidden = true;
-
-    try {
-      if (window.Vault.hasPassword()) {
-        if (!(await window.Vault.unlock(pass))) {
-          error.textContent = "Wrong password.";
-          error.hidden = false;
-          return;
-        }
-      } else {
-        if (pass.length < 6) {
-          error.textContent = "Use at least 6 characters.";
-          error.hidden = false;
-          return;
-        }
-        if (pass !== $("lockPass2").value) {
-          error.textContent = "The two passwords don't match.";
-          error.hidden = false;
-          return;
-        }
-        await window.Vault.setPassword(pass);
-      }
-      await window.Data.load();
-      renderGate();
-      renderAll();
-    } catch (e) {
-      error.textContent = e.message;
-      error.hidden = false;
-    }
-  });
 
   /* -------------------------------------------------------------- rendering */
 
@@ -462,24 +404,6 @@
     event.target.value = "";
   });
 
-  $("lockBtn").addEventListener("click", () => {
-    window.Vault.lock();
-    window.Data.unload();
-    $("settingsModal").close();
-    renderGate();
-  });
-
-  $("changePassBtn").addEventListener("click", async () => {
-    const current = prompt("Current password:");
-    if (current === null) return;
-    const next = prompt("New password (at least 6 characters):");
-    if (next === null) return;
-    if (next.length < 6) return toast("Use at least 6 characters.");
-    toast((await window.Vault.changePassword(current, next))
-      ? "Password changed"
-      : "That current password is wrong.");
-  });
-
   document.querySelectorAll("[data-close]").forEach((button) => {
     button.addEventListener("click", () => button.closest("dialog").close());
   });
@@ -503,11 +427,8 @@
   window.Data.onChange(renderAll);
 
   // A change arriving from another device replaces the store wholesale, so the
-  // decrypted copy in memory has to be rebuilt.
-  window.addEventListener("jobs-synced", async () => {
-    if (window.Vault.isUnlocked()) { await window.Data.load(); }
-    renderGate();
-  });
+  // copy held in memory has to be rebuilt.
+  window.addEventListener("jobs-synced", () => window.Data.load());
 
   window.addEventListener("jobs-sync-status", (event) => {
     const dot = $("syncDot");
@@ -520,6 +441,6 @@
 
   (async function init() {
     await window.Sync.ready;          // let Firebase land before we read the store
-    renderGate();
+    await window.Data.load();
   })();
 })();

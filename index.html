@@ -30,25 +30,8 @@
   </header>
 
   <main id="view" class="view" aria-live="polite">
-    <!-- ------------------------------------------------------- lock screen -->
-    <section id="lockScreen" class="lock" hidden>
-      <div class="lock-card">
-        <span class="material-symbols-rounded lock-icon">lock</span>
-        <h1 id="lockTitle">Unlock your jobs</h1>
-        <p id="lockText" class="lock-text">
-          Your jobs and API key are encrypted. Enter your password to open them.
-        </p>
-        <form id="lockForm" autocomplete="off">
-          <input id="lockPass" type="password" placeholder="Password" autocomplete="current-password" />
-          <input id="lockPass2" type="password" placeholder="Confirm password" autocomplete="new-password" hidden />
-          <button class="btn primary wide" type="submit">Unlock</button>
-        </form>
-        <p id="lockError" class="lock-error" hidden></p>
-      </div>
-    </section>
-
     <!-- ---------------------------------------------------------- job list -->
-    <section id="jobsScreen" hidden>
+    <section id="jobsScreen">
       <div class="toolbar">
         <div class="search-wrap">
           <span class="material-symbols-rounded">search</span>
@@ -249,15 +232,11 @@
         </div>
 
         <div class="field">
-          <span class="label">Security</span>
-          <div class="btn-row">
-            <button type="button" id="lockBtn" class="btn ghost small">
-              <span class="material-symbols-rounded">lock</span> Lock now
-            </button>
-            <button type="button" id="changePassBtn" class="btn ghost small">Change password</button>
-          </div>
+          <span class="label">Where your data lives</span>
           <span class="hint">
-            Everything is encrypted in your browser before it syncs. The password is never stored or sent.
+            Jobs and categories sync to Firebase, so they follow you to any device.
+            The API key does not — it stays in this browser only, so enter it once
+            on each device you use.
           </span>
         </div>
       </div>
@@ -272,10 +251,9 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <!-- load order matters: store, sync, vault, then data/extract, then the app -->
+  <!-- load order matters: store, sync, then data/extract, then the app -->
   <script src="js/store.js"></script>
   <script src="js/sync.js"></script>
-  <script src="js/vault.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/data.js"></script>
   <script src="js/extract.js"></script>

@@ -106,32 +106,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
   padding: 22px 20px 72px;
 }
 
-/* ── lock screen ────────────────────────────────────── */
-
-.lock { display: grid; place-items: center; min-height: 60vh; }
-
-.lock-card {
-  width: min(420px, 100%);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
-  padding: 34px 30px;
-  text-align: center;
-}
-
-.lock-icon {
-  font-size: 40px; color: var(--primary);
-  background: var(--primary-soft);
-  width: 68px; height: 68px; border-radius: 50%;
-  display: grid; place-items: center; margin: 0 auto 16px;
-}
-
-.lock-card h1 { font-size: 22px; margin-bottom: 8px; }
-.lock-text { color: var(--muted); margin: 0 0 20px; font-size: 15px; }
-.lock-card form { display: flex; flex-direction: column; gap: 10px; }
-.lock-error { color: var(--red-dark); font-weight: 700; margin: 14px 0 0; font-size: 14px; }
-
 /* ── controls ───────────────────────────────────────── */
 
 input, select, textarea {

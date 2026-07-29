@@ -2,8 +2,8 @@
  *
  * There is no server in this app, so the browser calls Anthropic directly. That
  * needs the `anthropic-dangerous-direct-browser-access` header, and it means the
- * key is present in the tab while the vault is unlocked. The key itself is only
- * ever stored AES-GCM encrypted (see data.js / vault.js).
+ * key is present in the tab. It is stored per-device and never synced (see
+ * data.js), so it stays out of the world-readable Firebase node.
  */
 (function () {
   const API_URL = "https://api.anthropic.com/v1/messages";

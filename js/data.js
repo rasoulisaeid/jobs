@@ -1,62 +1,39 @@
-/* Data — the jobs model, encrypted at rest.
+/* Data — the jobs model.
  *
- * Everything sensitive is AES-GCM encrypted by vault.js before it reaches
- * Store, because Store is mirrored to a Firebase node that is readable without
- * auth. Only ciphertext leaves the browser.
+ * Job records sync through Store to a Firebase node that is readable without
+ * auth. That's fine for job postings — they're public listings to begin with.
+ * The Claude API key is the one real secret, so it never goes near Store: it
+ * lives in its own localStorage key that sync.js doesn't mirror, which means
+ * it stays on this device and has to be entered once per browser.
  *
- *   "jobs"       -> [ { id, title, category, company, address, payMin, payMax,
- *                       payPeriod, employmentType, link, description, createdAt } ]   (encrypted)
- *   "categories" -> [ "Jewelry", ... ]                                                (encrypted)
- *   "apiKey"     -> "sk-ant-..."                                                      (encrypted)
- *   "prefs"      -> { model, effort, webSearch }                                       (plain — not secret)
+ *   Store "jobs"       -> [ { id, title, category, company, address, payMin, payMax,
+ *                             payPeriod, employmentType, link, description, createdAt } ]
+ *   Store "categories" -> [ "Jewelry", ... ]
+ *   Store "prefs"      -> { model, effort, webSearch }
+ *   local  apiKey      -> "sk-ant-..."   (this device only, never synced)
  */
 (function () {
   const DEFAULT_CATEGORIES = ["Jewelry", "Fashion", "Retail", "Museums"];
   const DEFAULT_PREFS = { model: "claude-opus-5", effort: "medium", webSearch: true };
+  const KEY_CELL = "jobs:local:apiKey";   // outside Store's namespace on purpose
 
   let jobs = [];
   let categories = [];
-  let apiKey = "";
   let loaded = false;
 
   const listeners = [];
   const onChange = (fn) => { listeners.push(fn); return () => listeners.splice(listeners.indexOf(fn), 1); };
   const notify = () => listeners.forEach((fn) => { try { fn(); } catch (e) {} });
 
-  async function readBlob(key, fallback) {
-    const blob = window.Store.get(key, null);
-    if (!blob) return fallback;
-    try {
-      const value = await window.Vault.decrypt(blob);
-      return value === null || value === undefined ? fallback : value;
-    } catch (e) {
-      // Wrong key or corrupt blob — don't destroy it, just show nothing.
-      console.warn("Data: could not decrypt", key, e.message);
-      return fallback;
-    }
-  }
-
-  async function writeBlob(key, value) {
-    window.Store.set(key, await window.Vault.encrypt(value));
-  }
-
   /* ------------------------------------------------------------- lifecycle */
 
-  // Pulls everything out of the encrypted store. Requires an unlocked vault.
+  // Reads the store into memory. Async only so callers can await it either way.
   async function load() {
-    if (!window.Vault.isUnlocked()) { loaded = false; return; }
-    jobs = await readBlob("jobs", []);
-    categories = await readBlob("categories", DEFAULT_CATEGORIES.slice());
-    apiKey = await readBlob("apiKey", "");
+    jobs = window.Store.get("jobs", []);
+    categories = window.Store.get("categories", DEFAULT_CATEGORIES.slice());
+    if (!Array.isArray(jobs)) jobs = [];
+    if (!Array.isArray(categories) || !categories.length) categories = DEFAULT_CATEGORIES.slice();
     loaded = true;
-    notify();
-  }
-
-  function unload() {
-    jobs = [];
-    categories = [];
-    apiKey = "";
-    loaded = false;
     notify();
   }
 
@@ -88,7 +65,7 @@
     if (at >= 0) jobs[at] = clean;
     else jobs.unshift(clean);
 
-    await writeBlob("jobs", jobs);
+    window.Store.set("jobs", jobs);
     if (clean.category) await addCategory(clean.category);
     notify();
     return clean;
@@ -96,7 +73,7 @@
 
   async function deleteJob(id) {
     jobs = jobs.filter((j) => j.id !== id);
-    await writeBlob("jobs", jobs);
+    window.Store.set("jobs", jobs);
     notify();
   }
 
@@ -114,32 +91,43 @@
     const clean = (name || "").trim();
     if (!clean || categories.includes(clean)) return clean;
     categories = [...categories, clean].sort((a, b) => a.localeCompare(b));
-    await writeBlob("categories", categories);
+    window.Store.set("categories", categories);
     notify();
     return clean;
   }
 
   async function removeCategory(name) {
     categories = categories.filter((c) => c !== name);
-    await writeBlob("categories", categories);
+    window.Store.set("categories", categories);
     notify();
   }
 
-  /* ---------------------------------------------------------------- secrets */
+  /* --------------------------------------------------------------- api key */
 
-  const getApiKey = () => apiKey;
-  const hasApiKey = () => Boolean(apiKey);
-  const keyPreview = () => (apiKey ? `${apiKey.slice(0, 11)}…${apiKey.slice(-4)}` : null);
+  // Read straight from localStorage rather than through Store, so it is never
+  // part of dump() and never wiped by an incoming restore().
+  function getApiKey() {
+    try { return localStorage.getItem(KEY_CELL) || ""; } catch (e) { return ""; }
+  }
+
+  const hasApiKey = () => Boolean(getApiKey());
+
+  function keyPreview() {
+    const key = getApiKey();
+    return key ? `${key.slice(0, 11)}…${key.slice(-4)}` : null;
+  }
 
   async function setApiKey(value) {
-    apiKey = (value || "").trim();
-    await writeBlob("apiKey", apiKey);
+    const key = (value || "").trim();
+    try {
+      if (key) localStorage.setItem(KEY_CELL, key);
+      else localStorage.removeItem(KEY_CELL);
+    } catch (e) { console.error("Could not save the API key", e); }
     notify();
   }
 
   /* ------------------------------------------------------------ preferences */
 
-  // Not secret, so kept in the clear — readable before the vault is unlocked.
   const getPrefs = () => ({ ...DEFAULT_PREFS, ...window.Store.get("prefs", {}) });
   function setPrefs(patch) {
     window.Store.set("prefs", { ...getPrefs(), ...patch });
@@ -190,14 +178,14 @@
     const incoming = Array.isArray(payload.categories) ? payload.categories : [];
     categories = [...new Set([...categories, ...incoming])].sort((a, b) => a.localeCompare(b));
 
-    await writeBlob("jobs", jobs);
-    await writeBlob("categories", categories);
+    window.Store.set("jobs", jobs);
+    window.Store.set("categories", categories);
     notify();
     return { added, skipped: payload.jobs.length - added };
   }
 
   window.Data = {
-    load, unload, isLoaded, onChange,
+    load, isLoaded, onChange,
     listJobs, saveJob, deleteJob,
     listCategories, addCategory, removeCategory,
     getApiKey, hasApiKey, keyPreview, setApiKey,

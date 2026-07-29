@@ -6,8 +6,7 @@ the store's real street address on the web.
 
 Vanilla HTML/CSS/JS, no build step, no dependencies. Same shape as
 [Systems](https://github.com/rasoulisaeid/systems): a `localStorage` cache
-mirrored to Firebase Realtime Database over plain REST, with `vault.js` doing
-AES-GCM encryption client-side.
+mirrored to Firebase Realtime Database over plain REST.
 
 ## Run it
 
@@ -22,11 +21,12 @@ AES-GCM encryption client-side.
 
 ## First run
 
-1. **Choose a password.** It encrypts everything before it syncs. It is never
-   stored and never sent anywhere — if you lose it, the data cannot be recovered.
-2. **Settings → Claude API key.** Get one at
-   [console.anthropic.com](https://console.anthropic.com/settings/keys).
-3. **Settings → Import JSON** if you have an export to bring in.
+No login, no password — open it and the jobs are there.
+
+1. **Settings → Claude API key.** Get one at
+   [console.anthropic.com](https://console.anthropic.com/settings/keys). This is
+   stored per-browser, so it has to be entered once on each device.
+2. **Settings → Import JSON** if you have an export to bring in.
 
 ## Using it
 
@@ -56,21 +56,24 @@ prints everything expanded.
 ## How data is stored
 
 ```
-browser  ──encrypt (AES-GCM)──►  localStorage  ──mirror──►  Firebase RTDB
-                                                            /jobs/rasoulisaeid
+browser  ──►  localStorage  ──mirror──►  Firebase RTDB /jobs/rasoulisaeid
 ```
 
-| Key | Contents | Encrypted |
+| Key | Contents | Synced |
 | --- | --- | --- |
-| `jobs` | every job record, including the pasted description | yes |
-| `categories` | your category list | yes |
-| `apiKey` | the Claude API key | yes |
-| `prefs` | model, thinking effort, address-lookup toggle | no — not secret |
+| `jobs:v1:jobs` | every job record, including the pasted description | yes |
+| `jobs:v1:categories` | your category list | yes |
+| `jobs:v1:prefs` | model, thinking effort, address-lookup toggle | yes |
+| `jobs:local:apiKey` | the Claude API key | **no — this device only** |
 
-The Firebase node is readable without auth, which is why everything sensitive is
-encrypted before it leaves the page. Changes sync live between devices over SSE;
-edits made offline are saved locally and pushed when the connection returns. The
-dot in the top bar is grey offline, red on a sync error.
+The Firebase node is readable without auth. Job postings are public listings, so
+they go up as-is. The API key is the one thing that must not, so it is kept
+outside the synced namespace entirely — `Store.dump()` never sees it and an
+incoming sync never overwrites it.
+
+Changes sync live between devices over SSE; edits made offline are saved locally
+and pushed when the connection returns. The dot in the top bar is grey offline,
+red on a sync error.
 
 **Back up with Settings → Export JSON.** That file is plaintext — keep it off
 the repo (it's gitignored) and off shared drives.
@@ -79,9 +82,10 @@ the repo (it's gitignored) and off shared drives.
 
 There is no server in this app, so the browser calls Anthropic directly. That
 requires the `anthropic-dangerous-direct-browser-access` header, and it means the
-key is present in the tab while the vault is unlocked. It is only ever *stored*
-encrypted. If that tradeoff stops being acceptable, move extraction behind a
-small proxy (a Cloudflare Worker is ~30 lines) and drop the key from the vault.
+key sits in `localStorage` on whichever device you typed it into. It never
+syncs and never reaches the repo. If that tradeoff stops being acceptable, move
+extraction behind a small proxy (a Cloudflare Worker is ~30 lines) and drop the
+key from the browser entirely.
 
 ## Structure
 
@@ -92,10 +96,11 @@ css/style.css       theme + shell (matches Systems)
 css/interview.css   interview page styles
 js/store.js         namespaced localStorage cache
 js/sync.js          Firebase RTDB mirror (REST + SSE)
-js/vault.js         password → AES-GCM key wrapping
 js/ui.js            el() / clear() DOM helpers
-js/data.js          jobs model, encrypted at rest
+js/data.js          jobs model
 js/extract.js       Claude API call + extraction schema
 js/app.js           dashboard wiring
 js/interview.js     interview page logic
+
+tools/import-to-firebase.mjs   one-shot bulk import of an export file
 ```

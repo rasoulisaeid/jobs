@@ -1,9 +1,9 @@
 /* Firebase sync — mirrors the Jobs cache to Firebase Realtime Database.
  *
  * Reuses the same RTDB as the Systems app, namespaced under /jobs (no collision
- * with /systems or the TOEFL app's /families). Job data and the Claude API key
- * are AES-GCM encrypted client-side by vault.js before they are stored, so only
- * ciphertext + the wrapped key ever leave the browser.
+ * with /systems or the TOEFL app's /families). The node is readable without
+ * auth, so only job records go up — they're public listings anyway. The Claude
+ * API key is deliberately kept out of Store (see data.js) and never syncs.
  *
  *   on load : Firebase -> localStorage (bounded, so the app always boots)
  *   on write: localStorage -> Firebase (debounced)
