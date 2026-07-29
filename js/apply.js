@@ -337,11 +337,22 @@
     node.className = `status ${kind}`;
   }
 
+  // How many lines differ, ignoring pure whitespace shuffling.
+  function changedLines(before, after) {
+    const a = before.split("\n").map((l) => l.trim());
+    const b = after.split("\n").map((l) => l.trim());
+    const inB = new Set(b);
+    const inA = new Set(a);
+    const gone = a.filter((l) => l && !inB.has(l)).length;
+    const added = b.filter((l) => l && !inA.has(l)).length;
+    return Math.max(gone, added);
+  }
+
   // "v3 — Jul 29" — the number counts what already exists for this job.
-  function nextVersionLabel() {
+  function nextVersionLabel(minimal) {
     const n = window.Resume.listVersions(jobId || null).length + 1;
     const when = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    return `v${n} — ${when}`;
+    return `v${n}${minimal ? " tweak" : ""} — ${when}`;
   }
 
   function openTailorPanel() {
@@ -366,14 +377,15 @@
     button.disabled = true;
     setStatus("Claude is rewriting the resume for this job — this takes a moment at high effort…");
 
+    const minimal = $("tailorMinimal").checked;
     try {
-      const result = await window.Tailor.tailor(job, $("latex").value, $("tailorNotes").value);
+      const result = await window.Tailor.tailor(job, $("latex").value, $("tailorNotes").value, { minimal });
 
       // Saved straight away, so it syncs and the next tailoring builds on it
       // rather than starting over from the default.
       const saved = window.Resume.saveVersion({
         jobId: jobId || null,
-        label: nextVersionLabel(),
+        label: nextVersionLabel(minimal),
         latex: result.latex,
         changes: result.changes,
         source: "claude",
@@ -381,9 +393,19 @@
 
       // saved.latex is the redacted copy — load that, so the box and the
       // stored version are the same text.
+      const before = $("latex").value;
       loadIntoEditor(saved.latex, saved.id);
       renderChanges(result.changes);
-      setStatus(`Saved as “${saved.label}”. Read it through — edits save by themselves.`, "ok");
+
+      // Say how much actually moved. In minimal mode that is the whole point,
+      // so a wide edit is worth flagging rather than letting her discover it.
+      const touched = changedLines(before, saved.latex);
+      const scale = `${touched} line${touched === 1 ? "" : "s"} changed`;
+      if (minimal && touched > 4) {
+        setStatus(`Saved as “${saved.label}”, but ${scale} — more than a small fix. Check it, and the older version is still in the list.`, "warn");
+      } else {
+        setStatus(`Saved as “${saved.label}” — ${scale}. Read it through; edits save by themselves.`, "ok");
+      }
     } catch (e) {
       setStatus(e.message, "error");
     } finally {
@@ -436,6 +458,11 @@
   $("tailorBtn").addEventListener("click", openTailorPanel);
   $("tailorRunBtn").addEventListener("click", runTailor);
   $("tailorCancelBtn").addEventListener("click", closeTailorPanel);
+
+  // The checkbox is useless without an instruction, so send her to the box.
+  $("tailorMinimal").addEventListener("change", (event) => {
+    if (event.target.checked && !$("tailorNotes").value.trim()) $("tailorNotes").focus();
+  });
 
   $("tailorNotes").addEventListener("keydown", (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") { event.preventDefault(); runTailor(); }

@@ -105,12 +105,21 @@
 .paper ul, .paper ol { margin: 4px 0 9px; padding-left: 18px; }
 .paper li { margin: 0 0 3px; }
 
-/* \hfill — parts pushed apart across the line */
-.r-row { display: flex; gap: 14px; align-items: baseline; margin: 9px 0 2px; }
-.r-row > span:first-child { text-align: left; }
-.r-row > span { flex: 1; text-align: center; }
-.r-row > span:last-child { text-align: right; white-space: nowrap; }
-.r-row > span:only-child { text-align: left; }
+/* \hfill — parts pushed apart across the line.
+   The push comes from auto margins, not from `flex: 1` ratios: during print
+   fragmentation the ratio resolution collapses and the whole row bunches up
+   against the title. Auto margins survive that, and mean the last part is
+   pinned to the right edge whatever the row width turns out to be. */
+.r-row {
+  display: flex; width: 100%;
+  justify-content: space-between;
+  gap: 14px; align-items: baseline;
+  margin: 9px 0 2px;
+}
+.r-row > span { flex: 0 1 auto; text-align: center; }
+.r-row > span:first-child { text-align: left; margin-right: auto; }
+.r-row > span:last-child { text-align: right; margin-left: auto; white-space: nowrap; }
+.r-row > span:only-child { text-align: left; margin: 0; }
 
 .r-center { text-align: center; margin-bottom: 14px; line-height: 1.5; }
 
@@ -189,6 +198,16 @@
 .tailor-panel .label em { font-weight: 500; color: var(--muted); font-style: normal; }
 .tailor-panel textarea { font-size: 14px; resize: vertical; }
 .tailor-panel .toolbar-row { margin-bottom: 0; }
+
+.scope-field {
+  margin-top: 11px; padding-top: 11px;
+  border-top: 1px solid var(--border);
+  display: grid; gap: 4px;
+}
+.scope-field .checkbox { align-items: flex-start; font-size: 14px; }
+.scope-field .checkbox input { margin-top: 2px; flex: none; }
+
+.status.warn { color: var(--amber-ink); }
 
 .tailor-facts {
   list-style: none; margin: 11px 0 4px; padding: 0;
@@ -283,6 +302,17 @@
   }
   /* Don't strand a heading or split a job across the page break. */
   .paper h2, .paper h3 { break-after: avoid; page-break-after: avoid; }
-  .paper .r-row { break-after: avoid; page-break-after: avoid; }
   .paper li { break-inside: avoid; page-break-inside: avoid; }
+
+  /* Keep the title/place/date row full width and its last part hard right.
+     break-after on a flex container is what collapsed this in print, so the
+     row keeps its own rule rather than inheriting the one above. */
+  .paper .r-row {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .paper .r-row > span:first-child { margin-right: auto !important; text-align: left !important; }
+  .paper .r-row > span:last-child { margin-left: auto !important; text-align: right !important; }
 }

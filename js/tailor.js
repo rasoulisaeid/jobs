@@ -81,10 +81,26 @@ ${posting || "(the posting text was not saved for this job)"}
 </posting>`;
   }
 
-  async function tailor(job, latex, notes) {
+  /* Two very different jobs, so they get very different orders. Full tailoring
+   * is free to rewrite; a minimal edit must leave everything it was not asked
+   * about byte-identical — otherwise a request to fix one bullet comes back as
+   * a new resume. */
+  const SCOPE = {
+    full: `SCOPE — full tailoring.
+Re-word and re-order the resume for this posting, following the guidance in your instructions.`,
+
+    minimal: `SCOPE — minimal edit. This overrides the tailoring guidance in your instructions.
+Do ONLY what she asked for below. Everything she did not mention must come back exactly as it is now — same words, same order, same bullets, same summary, same punctuation. Do not tidy, improve, shorten, or re-order anything else, even where you can see something you would have written differently. If her request touches one bullet, exactly one bullet changes. Return the whole document, but the untouched parts must be byte-identical to the input.`,
+  };
+
+  async function tailor(job, latex, notes, opts) {
     const source = (latex || "").trim();
     if (!source) throw new Error("There is no resume to tailor yet.");
     const instructions = (notes || "").trim();
+    const minimal = Boolean(opts && opts.minimal);
+    if (minimal && !instructions) {
+      throw new Error("Say what to change — “only do what I asked” needs an instruction.");
+    }
 
     const apiKey = window.Data.getApiKey();
     if (!apiKey) throw new Error("No Claude API key saved yet. Add one under Settings on the jobs page.");
@@ -110,7 +126,9 @@ If you cannot do what she asked, say so in "changes" rather than inventing somet
 ${instructions}
 </her_instructions>
 ` : ""}
-Tailor this resume to that posting.`,
+${minimal ? SCOPE.minimal : SCOPE.full}
+
+List in "changes" only what you actually altered. If you changed nothing, return an empty list.`,
       }],
     };
 

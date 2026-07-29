@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <link rel="stylesheet" href="css/style.css?v=9" />
-  <link rel="stylesheet" href="css/apply.css?v=9" />
+  <link rel="stylesheet" href="css/style.css?v=10" />
+  <link rel="stylesheet" href="css/apply.css?v=10" />
 </head>
 <body>
   <header class="topbar">
@@ -84,6 +84,19 @@
             <span class="label">Anything Claude should know? <em>(optional)</em></span>
             <textarea id="tailorNotes" rows="4" placeholder="e.g. Lead with the jewelry job. Keep it to one page. Use the posting's own words for clienteling. Don't stretch the pharmacy role."></textarea>
           </label>
+
+          <div class="field scope-field">
+            <label class="checkbox">
+              <input id="tailorMinimal" type="checkbox" />
+              <span>
+                <strong>Only do what I asked</strong> — leave every other word exactly as it is.
+              </span>
+            </label>
+            <span class="hint">
+              Off, it re-words and re-orders the whole resume for this posting. On, it changes
+              nothing you did not mention — use this for a small fix.
+            </span>
+          </div>
 
           <ul class="tailor-facts">
             <li>Claude <strong>Opus 5</strong>, high effort — a few cents and up to a minute.</li>
@@ -202,13 +215,13 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="js/store.js?v=9"></script>
-  <script src="js/sync.js?v=9"></script>
-  <script src="js/ui.js?v=9"></script>
-  <script src="js/data.js?v=9"></script>
-  <script src="js/resume.js?v=9"></script>
-  <script src="js/latex-render.js?v=9"></script>
-  <script src="js/tailor.js?v=9"></script>
-  <script src="js/apply.js?v=9"></script>
+  <script src="js/store.js?v=10"></script>
+  <script src="js/sync.js?v=10"></script>
+  <script src="js/ui.js?v=10"></script>
+  <script src="js/data.js?v=10"></script>
+  <script src="js/resume.js?v=10"></script>
+  <script src="js/latex-render.js?v=10"></script>
+  <script src="js/tailor.js?v=10"></script>
+  <script src="js/apply.js?v=10"></script>
 </body>
 </html>
