@@ -65,6 +65,12 @@
 .toolbar-row .spacer { flex: 1; }
 .toolbar-row form { margin: 0; }
 
+.edit-hint {
+  display: flex; align-items: center; gap: 6px;
+  margin: 0 0 8px;
+}
+.edit-hint .material-symbols-rounded { font-size: 16px; color: var(--primary); }
+
 /* ── the rendered resume ────────────────────────────── */
 
 /* Approximates the compiled PDF: serif face, the article class's heading
@@ -115,6 +121,32 @@
 .r-xs { font-size: 12px; }
 .r-ul { text-decoration: underline; }
 .r-tt { font-family: ui-monospace, Consolas, monospace; font-size: .92em; }
+
+/* ── click a line to edit it ────────────────────────── */
+
+/* Each .ed is one run of prose. The formatting around it is not selectable,
+   so editing can only ever change words. */
+.ed {
+  cursor: text;
+  border-radius: 3px;
+  /* box-shadow rather than padding, so nothing shifts on hover */
+  transition: background-color .12s ease, box-shadow .12s ease;
+}
+.paper:hover .ed:hover {
+  background: #fff6d8;
+  box-shadow: 0 0 0 2px #fff6d8;
+}
+.ed-active,
+.paper:hover .ed-active:hover {
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--primary);
+  outline: none;
+}
+.ed-locked { cursor: not-allowed; opacity: .95; }
+.paper:hover .ed-locked:hover {
+  background: var(--card-2);
+  box-shadow: 0 0 0 2px var(--card-2);
+}
 
 /* ── the source, tucked away ────────────────────────── */
 
@@ -244,6 +276,10 @@
     padding: 0.85in;                  /* matches \usepackage[margin=0.85in]{geometry} */
     font-size: 11pt; line-height: 1.4;
     overflow: visible;
+  }
+  /* no editing affordances on paper */
+  .ed, .ed-active, .ed-locked {
+    background: none !important; box-shadow: none !important; cursor: auto;
   }
   /* Don't strand a heading or split a job across the page break. */
   .paper h2, .paper h3 { break-after: avoid; page-break-after: avoid; }

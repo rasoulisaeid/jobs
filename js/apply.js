@@ -114,10 +114,18 @@
   // stitched in on the way out — to the preview, the printer, or a file.
   const forOutput = () => window.Resume.applyContact($("latex").value);
 
+  // The exact string the visible spans carry offsets into. Edits are spliced
+  // into this, then redacted back to placeholders before hitting the textarea.
+  let shownText = "";
+
   function renderPaper() {
     const paper = $("paper");
     try {
-      paper.innerHTML = window.LatexRender.toHtml(forOutput());
+      shownText = forOutput();
+      paper.innerHTML = window.LatexRender.toHtml(shownText, {
+        editable: true,
+        locked: Object.values(window.Resume.getContact()).filter(Boolean),
+      });
     } catch (e) {
       // A preview failing must never cost her the document.
       paper.replaceChildren(el("p", {
@@ -127,6 +135,87 @@
       console.warn("preview failed", e);
     }
   }
+
+  /* ------------------------------------------------------ editing in place */
+
+  let editing = null;   // { span, before }
+
+  function beginEdit(span) {
+    if (editing) commitEdit();
+    editing = { span, before: span.textContent };
+    span.contentEditable = "true";
+    span.spellcheck = true;
+    span.classList.add("ed-active");
+    span.focus();
+  }
+
+  function endEdit() {
+    if (!editing) return null;
+    const { span, before } = editing;
+    editing = null;
+    span.contentEditable = "false";
+    span.classList.remove("ed-active");
+    return { span, before, after: span.textContent };
+  }
+
+  function commitEdit() {
+    const done = endEdit();
+    if (!done) return;
+    const { span, before, after } = done;
+    if (after === before) return;
+
+    const start = Number(span.dataset.s);
+    const end = Number(span.dataset.e);
+    const next = window.LatexRender.replaceRange(shownText, start, end, after);
+    if (next === null) {
+      renderPaper();                        // offsets went stale — just redraw
+      return toast("Couldn't place that edit — nothing changed");
+    }
+
+    // Back through redact() so the contact placeholders are restored.
+    $("latex").value = window.Resume.redact(next);
+    renderEditorState();                    // re-renders the paper with new offsets
+  }
+
+  function cancelEdit() {
+    if (!editing) return;
+    editing.span.textContent = editing.before;
+    endEdit();
+  }
+
+  $("paper").addEventListener("click", (event) => {
+    const span = event.target.closest(".ed");
+    if (!span) { commitEdit(); return; }
+    if (span === editing?.span) return;     // already editing this one
+    beginEdit(span);
+  });
+
+  $("paper").addEventListener("focusout", (event) => {
+    if (editing && event.target === editing.span) commitEdit();
+  });
+
+  $("paper").addEventListener("keydown", (event) => {
+    if (!editing) return;
+    if (event.key === "Enter") { event.preventDefault(); commitEdit(); }
+    if (event.key === "Escape") { event.preventDefault(); cancelEdit(); }
+    if (event.key === "Tab") {
+      // Step to the next run so a row can be filled in without the mouse.
+      const spans = [...$("paper").querySelectorAll(".ed")];
+      const at = spans.indexOf(editing.span);
+      event.preventDefault();
+      commitEdit();
+      const next = [...$("paper").querySelectorAll(".ed")][at + (event.shiftKey ? -1 : 1)];
+      if (next) beginEdit(next);
+    }
+  });
+
+  // Paste as plain text — a copy from Word would otherwise bring markup with it.
+  $("paper").addEventListener("paste", (event) => {
+    if (!editing) return;
+    event.preventDefault();
+    const text = (event.clipboardData || window.clipboardData).getData("text/plain");
+    document.execCommand("insertText", false, text.replace(/\s+/g, " "));
+  });
 
   function renderEditorState() {
     const version = activeVersionId ? window.Resume.getVersion(activeVersionId) : null;
@@ -363,12 +452,18 @@
   }
 
   function renderPreviewWithForm() {
-    const draft = window.Resume.applyContact($("latex").value, {
+    const draft = {
       address: $("contactAddress").value.trim(),
       phone: $("contactPhone").value.trim(),
       email: $("contactEmail").value.trim(),
-    });
-    try { $("paper").innerHTML = window.LatexRender.toHtml(draft); } catch (e) {}
+    };
+    try {
+      shownText = window.Resume.applyContact($("latex").value, draft);
+      $("paper").innerHTML = window.LatexRender.toHtml(shownText, {
+        editable: true,
+        locked: Object.values(draft).filter(Boolean),
+      });
+    } catch (e) { /* keep whatever is on screen */ }
   }
 
   function loadContactForm() {

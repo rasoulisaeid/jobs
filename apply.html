@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <link rel="stylesheet" href="css/style.css?v=7" />
-  <link rel="stylesheet" href="css/apply.css?v=7" />
+  <link rel="stylesheet" href="css/style.css?v=8" />
+  <link rel="stylesheet" href="css/apply.css?v=8" />
 </head>
 <body>
   <header class="topbar">
@@ -105,6 +105,11 @@
         <p id="tailorStatus" class="status"></p>
 
         <!-- What she is actually sending. The LaTeX behind it is one toggle away. -->
+        <p class="hint edit-hint">
+          <span class="material-symbols-rounded">edit</span>
+          Click any line to change the wording. Enter saves, Escape undoes, Tab moves on.
+          The layout and the bold cannot be broken by editing.
+        </p>
         <div id="paper" class="paper" aria-label="Resume preview"></div>
 
         <details id="sourceBox" class="source">
@@ -198,13 +203,13 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="js/store.js?v=7"></script>
-  <script src="js/sync.js?v=7"></script>
-  <script src="js/ui.js?v=7"></script>
-  <script src="js/data.js?v=7"></script>
-  <script src="js/resume.js?v=7"></script>
-  <script src="js/latex-render.js?v=7"></script>
-  <script src="js/tailor.js?v=7"></script>
-  <script src="js/apply.js?v=7"></script>
+  <script src="js/store.js?v=8"></script>
+  <script src="js/sync.js?v=8"></script>
+  <script src="js/ui.js?v=8"></script>
+  <script src="js/data.js?v=8"></script>
+  <script src="js/resume.js?v=8"></script>
+  <script src="js/latex-render.js?v=8"></script>
+  <script src="js/tailor.js?v=8"></script>
+  <script src="js/apply.js?v=8"></script>
 </body>
 </html>
