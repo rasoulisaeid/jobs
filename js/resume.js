@@ -237,6 +237,17 @@ Bachelor of Arts, Archaeology
     notify();
   }
 
+  // In-place text update — how autosave keeps a loaded version current.
+  function updateVersion(id, latex) {
+    const list = allVersions();
+    const at = list.findIndex((v) => v.id === id);
+    if (at < 0) return null;
+    list[at] = { ...list[at], latex: redact(String(latex || "")), updatedAt: new Date().toISOString() };
+    writeVersions(list);
+    notify();
+    return list[at];
+  }
+
   function renameVersion(id, label) {
     const list = allVersions();
     const at = list.findIndex((v) => v.id === id);
@@ -286,7 +297,7 @@ Bachelor of Arts, Archaeology
     DEFAULT_LATEX, PLACEHOLDERS, FIELDS,
     getBase, setBase, resetBase,
     getContact, setContact, hasContact, applyContact, redact, needsContactDetails, escapeLatex,
-    listVersions, latestVersion, getVersion, saveVersion, deleteVersion, renameVersion,
+    listVersions, latestVersion, getVersion, saveVersion, updateVersion, deleteVersion, renameVersion,
     migrateLocal, onChange,
   };
 })();

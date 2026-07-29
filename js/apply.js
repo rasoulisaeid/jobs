@@ -110,6 +110,56 @@
 
   const isDirty = () => $("latex").value !== loadedText;
 
+  /* --------------------------------------------------------------- autosave */
+
+  /* Every edit persists on its own — pressing a button to keep your work is a
+   * good way to lose it. Where it goes depends on what is open:
+   *
+   *   a loaded version      -> that version
+   *   a job with no version -> a new one for that job, so the default stays clean
+   *   the default resume    -> the default
+   */
+  let saveTimer = null;
+  let savePending = false;
+
+  function scheduleSave() {
+    savePending = true;
+    setSaveState("Saving…");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 600);
+  }
+
+  function saveNow() {
+    clearTimeout(saveTimer);
+    if (!savePending) return;
+    savePending = false;
+
+    const latex = $("latex").value;
+    try {
+      if (activeVersionId && window.Resume.getVersion(activeVersionId)) {
+        window.Resume.updateVersion(activeVersionId, latex);
+      } else if (jobId) {
+        const when = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        activeVersionId = window.Resume.saveVersion({
+          jobId, label: `Edited — ${when}`, latex, source: "manual",
+        }).id;
+      } else {
+        window.Resume.setBase(latex);
+      }
+      loadedText = latex;
+      renderVersions();
+      setSaveState("Saved");
+    } catch (e) {
+      setSaveState("Not saved — " + e.message);
+      console.error("autosave failed", e);
+    }
+  }
+
+  function setSaveState(text) {
+    const version = activeVersionId ? window.Resume.getVersion(activeVersionId) : null;
+    $("editorState").textContent = version ? `${version.label} · ${text}` : text;
+  }
+
   // The document keeps its placeholder tokens; the real details are only
   // stitched in on the way out — to the preview, the printer, or a file.
   const forOutput = () => window.Resume.applyContact($("latex").value);
@@ -174,6 +224,7 @@
 
     // Back through redact() so the contact placeholders are restored.
     $("latex").value = window.Resume.redact(next);
+    scheduleSave();
     renderEditorState();                    // re-renders the paper with new offsets
   }
 
@@ -219,14 +270,10 @@
 
   function renderEditorState() {
     const version = activeVersionId ? window.Resume.getVersion(activeVersionId) : null;
-    const dirty = isDirty();
-
-    $("editorState").textContent = version
-      ? `${version.label}${dirty ? " — edited" : ""}`
-      : dirty ? "Edited — not saved" : "Default resume";
-
-    $("revertBtn").hidden = !dirty;
-    $("saveBaseBtn").hidden = Boolean(job) && !dirty && !version;
+    if (!savePending) {
+      $("editorState").textContent = version ? `${version.label} · Saved` : "Default resume";
+    }
+    $("saveBaseBtn").hidden = !job;
     $("contactWarn").hidden = !window.Resume.needsContactDetails($("latex").value);
     $("charCount").textContent = `${$("latex").value.length.toLocaleString("en-US")} characters`;
     renderPaper();
@@ -245,7 +292,7 @@
           class: "version-main",
           title: "Load this version",
           onclick: () => {
-            if (isDirty() && !confirm("Discard the unsaved edits and load this version?")) return;
+            saveNow();                       // current work is already safe
             loadIntoEditor(version.latex, version.id);
             renderChanges(version.changes || []);
             toast(`Loaded “${version.label}”`);
@@ -314,6 +361,7 @@
 
   async function runTailor() {
     closeTailorPanel();
+    saveNow();                      // don't lose pending edits to the round trip
     const button = $("tailorBtn");
     button.disabled = true;
     setStatus("Claude is rewriting the resume for this job — this takes a moment at high effort…");
@@ -331,9 +379,11 @@
         source: "claude",
       });
 
-      loadIntoEditor(result.latex, saved.id);
+      // saved.latex is the redacted copy — load that, so the box and the
+      // stored version are the same text.
+      loadIntoEditor(saved.latex, saved.id);
       renderChanges(result.changes);
-      setStatus(`Saved as “${saved.label}”. Read it through — edit freely, it will sync.`, "ok");
+      setStatus(`Saved as “${saved.label}”. Read it through — edits save by themselves.`, "ok");
     } catch (e) {
       setStatus(e.message, "error");
     } finally {
@@ -382,7 +432,7 @@
 
   /* --------------------------------------------------------------- wiring */
 
-  $("latex").addEventListener("input", renderEditorState);
+  $("latex").addEventListener("input", () => { scheduleSave(); renderEditorState(); });
   $("tailorBtn").addEventListener("click", openTailorPanel);
   $("tailorRunBtn").addEventListener("click", runTailor);
   $("tailorCancelBtn").addEventListener("click", closeTailorPanel);
@@ -416,11 +466,6 @@
     window.Resume.setBase($("latex").value);
     loadIntoEditor($("latex").value, null);
     toast("Default resume updated");
-  });
-
-  $("revertBtn").addEventListener("click", () => {
-    if (!confirm("Discard the changes since this was loaded?")) return;
-    loadIntoEditor(loadedText, activeVersionId);
   });
 
   $("resetBtn").addEventListener("click", () => {
@@ -473,10 +518,12 @@
     $("contactEmail").value = contact.email;
   }
 
-  window.addEventListener("beforeunload", (event) => {
-    if (!isDirty()) return;
-    event.preventDefault();
-    event.returnValue = "";
+  // Flush before the tab can go away — a 600ms debounce is plenty of time to
+  // lose an edit to a reload or a back button.
+  window.addEventListener("beforeunload", saveNow);
+  window.addEventListener("pagehide", saveNow);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") saveNow();
   });
 
   window.addEventListener("jobs-sync-status", (event) => {
