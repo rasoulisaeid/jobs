@@ -201,13 +201,29 @@
     node.className = `status ${kind}`;
   }
 
+  function openTailorPanel() {
+    $("tailorTarget").textContent = job
+      ? `Tailor for ${job.title || "this role"}${job.company ? ` at ${job.company}` : ""}`
+      : "Make a new version of the default resume";
+    $("tailorPanel").hidden = false;
+    $("tailorBtn").disabled = true;
+    setStatus("");
+    setTimeout(() => $("tailorNotes").focus(), 40);
+  }
+
+  function closeTailorPanel() {
+    $("tailorPanel").hidden = true;
+    $("tailorBtn").disabled = false;
+  }
+
   async function runTailor() {
+    closeTailorPanel();
     const button = $("tailorBtn");
     button.disabled = true;
     setStatus("Claude is rewriting the resume for this job — this takes a moment at high effort…");
 
     try {
-      const result = await window.Tailor.tailor(job, $("latex").value);
+      const result = await window.Tailor.tailor(job, $("latex").value, $("tailorNotes").value);
       loadIntoEditor(result.latex, null);
       renderChanges(result.changes);
       setStatus("Done — read it through before you save it.", "ok");
@@ -260,7 +276,14 @@
   /* --------------------------------------------------------------- wiring */
 
   $("latex").addEventListener("input", renderEditorState);
-  $("tailorBtn").addEventListener("click", runTailor);
+  $("tailorBtn").addEventListener("click", openTailorPanel);
+  $("tailorRunBtn").addEventListener("click", runTailor);
+  $("tailorCancelBtn").addEventListener("click", closeTailorPanel);
+
+  $("tailorNotes").addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") { event.preventDefault(); runTailor(); }
+    if (event.key === "Escape") { event.preventDefault(); closeTailorPanel(); }
+  });
   $("downloadBtn").addEventListener("click", download);
   $("copyBtn").addEventListener("click", copyLatex);
   $("printBtn").addEventListener("click", () => window.print());

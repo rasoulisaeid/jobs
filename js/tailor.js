@@ -81,9 +81,10 @@ ${posting || "(the posting text was not saved for this job)"}
 </posting>`;
   }
 
-  async function tailor(job, latex) {
+  async function tailor(job, latex, notes) {
     const source = (latex || "").trim();
     if (!source) throw new Error("There is no resume to tailor yet.");
+    const instructions = (notes || "").trim();
 
     const apiKey = window.Data.getApiKey();
     if (!apiKey) throw new Error("No Claude API key saved yet. Add one under Settings on the jobs page.");
@@ -101,7 +102,14 @@ Her current resume:
 <resume>
 ${source}
 </resume>
-
+${instructions ? `
+She has asked for this specifically. It comes from her, not from the posting, so
+follow it — except where it would break a truthfulness rule, which nothing overrides.
+If you cannot do what she asked, say so in "changes" rather than inventing something.
+<her_instructions>
+${instructions}
+</her_instructions>
+` : ""}
 Tailor this resume to that posting.`,
       }],
     };
