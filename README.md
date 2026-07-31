@@ -78,25 +78,27 @@ edit. **Print / Save as PDF** is the quickest route to an attachment;
 **Overleaf** typesets the real LaTeX (and uploads the resume to a third party to
 do it). `Edit the LaTeX source` opens the source if it needs a hand edit.
 
-### Mock interview
+### Interview
 
-The microphone icon opens `mock.html`: five interviews, five sections each,
-twenty questions apiece. The five are five different employers — a small
-boutique, a luxury flagship, a mall chain, a fashion store, and a second-round
-manager — because the same job title is interviewed very differently by each.
-Every version runs greeting → experience → the role → shop-floor situations →
-closing.
+The microphone icon opens `mock.html?job=<id>`: one interview, researched and
+written for that specific job. Claude gets the posting, the tailored resume and
+the cover letter, then **searches the web for what candidates report being asked
+at that company** — Glassdoor, Indeed, write-ups — and produces 15 questions in
+six sections, from the greeting through to the close.
 
-One question fills the screen at a time, and **ElevenLabs reads it aloud** so
-it has to be answered out loud rather than skim-read. Add voice IDs at the top
-of the page (ElevenLabs → Voices → copy the Voice ID); the API key goes in
-**Settings** on the jobs page. Voice IDs sync — they are not secret. The key
-does not. Audio is cached per question for the session, so replaying costs
-nothing.
+A question is badged **Reported at this company** only when a source actually
+attributes it to that employer; anything Claude wrote itself stays unbadged. The
+sources it used are linked at the top, so the claim is checkable. If it found
+nothing about the company it says so rather than dressing up generic questions.
 
-Space plays, arrow keys move. **Show what they want** reveals what the
-interviewer is listening for, and stays hidden by default so it is practice
-rather than reading.
+Every question carries an answer in her own words, built only from her resume
+and letter, plus a line on what the interviewer is really checking. The whole
+sheet is on one page — it is a study sheet, not a simulation — and prints.
+
+**ElevenLabs** reads any question aloud, purely to get used to hearing them in
+different accents. Add voice IDs on the page (ElevenLabs → Voices → copy the
+Voice ID) and switch between them; the API key goes in **Settings** on the jobs
+page. Voice IDs sync — they are not secret. The key does not.
 
 ### Interview prep
 
@@ -184,10 +186,10 @@ js/cover.js         cover letters, same API so apply.js shares one path
 js/latex-render.js  LaTeX subset -> HTML, with source offsets for inline editing
 js/tailor.js        tailoring + letter writing (Opus 5, high effort)
 js/voice.js         ElevenLabs text-to-speech + the voice list
-js/mock-data.js     5 interviews x 5 sections x 4 questions
+js/interviews.js    per-job interview: web research + storage
 js/app.js           dashboard wiring
 js/apply.js         apply page wiring
-js/mock.js          mock interview logic
+js/mock.js          interview page logic
 js/interview.js     interview page logic
 
 tools/import-to-firebase.mjs   one-shot bulk import of an export file

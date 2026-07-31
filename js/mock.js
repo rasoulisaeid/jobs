@@ -1,23 +1,59 @@
-/* Mock interview — runs one question at a time, read aloud by ElevenLabs.
+/* Interview page — one researched question set per job, all of it on screen.
  *
- * One question on screen at a time on purpose. A list of twenty questions gets
- * skim-read; one question with a voice asking it gets answered out loud, which
- * is the only practice that helps on the day.
+ * ?job=<id>  the job to prepare for; no parameter shows a list to pick from.
+ *
+ * Everything is visible at once by design. This is a study sheet, not a
+ * simulation: she reads down it, plays a question when she wants to hear the
+ * accent, and covers the answer with her hand when she wants to test herself.
  */
 (function () {
   const $ = (id) => document.getElementById(id);
   const { el } = window.UI;
 
-  const DONE_CELL = "jobs:local:mockRuns";   // which runs are finished, per device
+  let jobId = new URLSearchParams(location.search).get("job");
+  let job = null;
 
-  let run = null;      // { version, flat: [{ sectionTitle, q, tip }], at }
+  /* ------------------------------------------------------------ formatting */
+
+  const PERIOD_LABEL = { hour: "hr", day: "day", week: "wk", month: "mo", year: "yr" };
+  const formatMoney = (n) => (n % 1 === 0 ? n.toLocaleString("en-US") : n.toFixed(2));
+
+  function formatPay(j) {
+    const { payMin: min, payMax: max, payPeriod: period } = j;
+    if (min == null && max == null) return "";
+    const unit = period ? `/${PERIOD_LABEL[period] || period}` : "";
+    if (min != null && max != null && min !== max) return `$${formatMoney(min)}–${formatMoney(max)}${unit}`;
+    return `$${formatMoney(min ?? max)}${unit}`;
+  }
+
+  const CHIP_COLORS = [
+    ["#ede9fe", "#5b21b6"], ["#e0f2fe", "#075985"], ["#dcfce7", "#166534"],
+    ["#ffedd5", "#9a3412"], ["#fce7f3", "#9d174d"], ["#ccfbf1", "#115e59"],
+    ["#fef9c3", "#854d0e"],
+  ];
+
+  function chipColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    return CHIP_COLORS[hash % CHIP_COLORS.length];
+  }
+
+  function safeUrl(raw) {
+    if (!raw) return null;
+    try {
+      const url = new URL(String(raw).includes("://") ? raw : `https://${raw}`);
+      return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+    } catch (e) { return null; }
+  }
+
+  const mapsUrl = (address) =>
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
   /* ---------------------------------------------------------------- voices */
 
   function renderVoices() {
     const voices = window.Voice.listVoices();
     const select = $("voiceSelect");
-    const chosen = window.Voice.getSelected();
 
     select.replaceChildren();
     if (!voices.length) {
@@ -26,7 +62,7 @@
     } else {
       select.disabled = false;
       for (const v of voices) select.append(new Option(v.name, v.id));
-      select.value = chosen;
+      select.value = window.Voice.getSelected();
     }
 
     $("removeVoiceBtn").hidden = !voices.length;
@@ -34,21 +70,18 @@
 
     const status = $("voiceStatus");
     if (!window.Voice.hasKey()) {
-      status.className = "hint warn";
-      status.textContent = "No ElevenLabs API key yet — add one under Settings on the jobs page, then the questions can be read aloud.";
+      status.className = "hint";
+      status.textContent = "Optional. Add an ElevenLabs key under Settings on the jobs page to hear the questions read out in different accents.";
     } else if (!voices.length) {
       status.className = "hint warn";
       status.textContent = "Key saved. Add a voice ID to hear the questions.";
     } else {
       status.className = "hint ok";
-      status.textContent = `Key saved (${window.Voice.keyPreview()}). ${voices.length} voice${voices.length === 1 ? "" : "s"} ready.`;
+      status.textContent = `${voices.length} voice${voices.length === 1 ? "" : "s"} ready — switch between them to practise different accents.`;
     }
   }
 
-  $("voiceSelect").addEventListener("change", (event) => {
-    window.Voice.setSelected(event.target.value);
-    toast("Voice changed");
-  });
+  $("voiceSelect").addEventListener("change", (event) => window.Voice.setSelected(event.target.value));
 
   $("addVoiceBtn").addEventListener("click", () => {
     $("addVoiceForm").hidden = false;
@@ -71,9 +104,7 @@
       $("voiceId").value = "";
       renderVoices();
       toast(`Added ${voice.name}`);
-    } catch (e) {
-      toast(e.message);
-    }
+    } catch (e) { toast(e.message); }
   });
 
   $("removeVoiceBtn").addEventListener("click", () => {
@@ -82,183 +113,216 @@
     if (!voice || !confirm(`Remove “${voice.name}” from the list?`)) return;
     window.Voice.removeVoice(id);
     renderVoices();
-    toast("Voice removed");
   });
 
   $("testVoiceBtn").addEventListener("click", async () => {
     const button = $("testVoiceBtn");
     button.disabled = true;
     try {
-      await window.Voice.speak("Hello. Thanks for coming in today. Shall we get started?", $("voiceSelect").value);
+      await window.Voice.speak("Thanks for coming in today. Tell me a little about yourself.", $("voiceSelect").value);
+    } catch (e) { toast(e.message); } finally { button.disabled = false; }
+  });
+
+  async function playQuestion(text, button) {
+    const icon = button.querySelector(".material-symbols-rounded");
+    button.disabled = true;
+    icon.textContent = "graphic_eq";
+    try {
+      await window.Voice.speak(text, $("voiceSelect").value);
     } catch (e) {
       toast(e.message);
     } finally {
       button.disabled = false;
+      icon.textContent = "volume_up";
     }
-  });
-
-  /* -------------------------------------------------------------- picking */
-
-  const doneRuns = () => {
-    try { return JSON.parse(localStorage.getItem(DONE_CELL) || "[]"); } catch (e) { return []; }
-  };
-
-  function markDone(id) {
-    const list = [...new Set([...doneRuns(), id])];
-    try { localStorage.setItem(DONE_CELL, JSON.stringify(list)); } catch (e) {}
   }
 
-  function renderVersions() {
-    const done = doneRuns();
-    const list = $("versionList");
+  /* ------------------------------------------------------------- the job */
+
+  function renderJob() {
+    $("jobTitle").textContent = job.title || "(untitled)";
+    $("jobCompany").textContent = job.company || "";
+    document.title = `${job.title || "Interview"} — Interview`;
+
+    if (job.category) {
+      const [bg, fg] = chipColor(job.category);
+      const chip = $("jobCategory");
+      chip.textContent = job.category;
+      chip.style.background = bg;
+      chip.style.color = fg;
+      chip.hidden = false;
+    }
+
+    const facts = $("jobFacts");
+    facts.replaceChildren();
+    const address = (job.address || "").trim();
+    if (address) {
+      facts.append(address.toLowerCase() === "remote"
+        ? el("span", null, el("b", { text: "Remote" }))
+        : el("span", null, el("a", {
+            href: mapsUrl(address), target: "_blank", rel: "noopener noreferrer",
+            title: "Open in Google Maps", text: address,
+          })));
+    }
+    const pay = formatPay(job);
+    if (pay) facts.append(el("span", null, el("b", { text: pay })));
+    if (job.employmentType) facts.append(el("span", { text: job.employmentType }));
+
+    const link = safeUrl(job.link);
+    if (link) { $("jobLink").href = link; $("jobLink").hidden = false; }
+  }
+
+  function renderJobPicker() {
+    const jobs = window.Data.listJobs();
+    const list = $("jobList");
     list.replaceChildren();
 
-    for (const version of window.MockInterviews) {
-      const questions = version.sections.reduce((n, s) => n + s.questions.length, 0);
-      list.append(el("button", {
-        class: `version-card${done.includes(version.id) ? " is-done" : ""}`,
-        type: "button",
-        onclick: () => startRun(version),
+    for (const j of jobs) {
+      const saved = window.Interviews.get(j.id);
+      list.append(el("a", {
+        class: `job-pick${saved ? " is-ready" : ""}`,
+        href: `mock.html?job=${encodeURIComponent(j.id)}`,
       },
-        el("div", { class: "version-top" },
-          el("span", { class: "version-name", text: version.name }),
-          done.includes(version.id)
-            ? el("span", { class: "material-symbols-rounded version-tick", text: "check_circle" })
-            : null),
-        el("span", { class: "version-tone", text: version.tone }),
-        el("p", { class: "version-blurb", text: version.blurb }),
-        el("span", { class: "version-meta", text: `${version.sections.length} sections · ${questions} questions` }),
+        el("span", { class: "job-pick-title", text: j.title || "(untitled)" }),
+        el("span", { class: "job-pick-company", text: j.company || "" }),
+        el("span", {
+          class: "job-pick-meta",
+          text: saved ? `${window.Interviews.countQuestions(saved)} questions ready` : "Not built yet",
+        }),
       ));
     }
 
-    const finished = window.MockInterviews.filter((v) => done.includes(v.id)).length;
-    $("runCount").textContent = finished ? `${finished} of ${window.MockInterviews.length} done` : "";
-  }
-
-  /* ------------------------------------------------------------- the run */
-
-  function startRun(version) {
-    const flat = [];
-    for (const section of version.sections) {
-      section.questions.forEach((question, i) => {
-        flat.push({
-          section: section.title,
-          sectionIndex: version.sections.indexOf(section) + 1,
-          first: i === 0,
-          q: question.q,
-          tip: question.tip,
-        });
-      });
+    if (!jobs.length) {
+      list.append(el("p", { class: "hint", text: "No jobs saved yet. Add one on the jobs page first." }));
     }
-    run = { version, flat, at: 0 };
-
-    $("pickScreen").hidden = true;
-    $("doneScreen").hidden = true;
-    $("runScreen").hidden = false;
-    $("runName").textContent = version.name;
-    renderQuestion();
   }
 
-  function renderQuestion() {
-    const item = run.flat[run.at];
-    const total = run.flat.length;
+  /* ------------------------------------------------------------ the sheet */
 
-    $("runSection").textContent = `Part ${item.sectionIndex} · ${item.section}`;
-    $("questionText").textContent = item.q;
-    $("tipText").textContent = item.tip;
-    $("tipText").hidden = true;
-    $("tipBtn").textContent = "Show what they want";
-    $("playStatus").textContent = "";
-    $("playStatus").className = "status";
+  function renderInterview() {
+    const saved = window.Interviews.get(jobId);
+    $("result").hidden = !saved;
+    $("emptyState").hidden = Boolean(saved);
+    $("regenBtn").hidden = !saved;
+    $("genLabel").textContent = saved ? "Build a new one" : "Build the interview";
 
-    $("progressFill").style.width = `${((run.at + 1) / total) * 100}%`;
-    $("progressText").textContent = `Question ${run.at + 1} of ${total}`;
+    if (!saved) { $("qCount").textContent = ""; $("genMeta").textContent = ""; return; }
 
-    $("prevBtn").disabled = run.at === 0;
-    $("nextBtn").innerHTML = "";
-    $("nextBtn").append(
-      run.at === total - 1 ? "Finish" : "Next",
-      el("span", { class: "material-symbols-rounded", text: run.at === total - 1 ? "done" : "arrow_forward" }),
-    );
+    const total = window.Interviews.countQuestions(saved);
+    $("qCount").textContent = `${total} questions`;
+    const when = new Date(saved.createdAt);
+    $("genMeta").textContent = `Built ${when.toLocaleDateString("en-US", { month: "short", day: "numeric" })} at ${when.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
 
-    if ($("autoPlay").checked) play();
+    // what the research turned up
+    $("researchBox").hidden = !saved.research && !(saved.sources || []).length;
+    $("researchText").textContent = saved.research || "";
+    const sources = $("sourceList");
+    sources.replaceChildren();
+    for (const source of saved.sources || []) {
+      const url = safeUrl(source.url);
+      if (!url) continue;
+      sources.append(el("a", {
+        class: "source", href: url, target: "_blank", rel: "noopener noreferrer",
+      }, el("span", { class: "material-symbols-rounded", text: "link" }), source.title || url));
+    }
+
+    // every question on the page at once
+    const wrap = $("sections");
+    wrap.replaceChildren();
+    let n = 0;
+
+    for (const section of saved.sections || []) {
+      const block = el("section", { class: "qa-section" },
+        el("h2", { class: "qa-section-title", text: section.title }));
+
+      for (const item of section.questions || []) {
+        n++;
+        block.append(el("article", { class: "qa" },
+          el("div", { class: "qa-head" },
+            el("span", { class: "qa-num", text: String(n) }),
+            el("h3", { class: "qa-q", text: item.question }),
+            el("button", {
+              class: "qa-play", type: "button",
+              title: "Hear this question",
+              "aria-label": `Play question ${n}`,
+              onclick: (event) => playQuestion(item.question, event.currentTarget),
+            }, el("span", { class: "material-symbols-rounded", text: "volume_up" })),
+          ),
+          item.reported
+            ? el("span", { class: "qa-badge", title: "A candidate reported this exact question at this company" },
+                el("span", { class: "material-symbols-rounded", text: "verified" }), "Reported at this company")
+            : null,
+          el("div", { class: "qa-answer" },
+            el("span", { class: "qa-label", text: "Say something like" }),
+            el("p", { text: item.answer })),
+          item.why ? el("p", { class: "qa-why", text: item.why }) : null,
+        ));
+      }
+      wrap.append(block);
+    }
   }
 
-  async function play() {
-    const item = run.flat[run.at];
-    const button = $("playBtn");
-    const status = $("playStatus");
+  /* ----------------------------------------------------------- generating */
 
-    button.disabled = true;
-    $("playLabel").textContent = "Playing…";
-    status.textContent = "";
-    status.className = "status";
+  function setStatus(message, kind = "") {
+    const node = $("genStatus");
+    node.textContent = message;
+    node.className = `status ${kind}`;
+  }
+
+  $("genBtn").addEventListener("click", () => {
+    $("genPanel").hidden = false;
+    $("genBtn").disabled = true;
+    setStatus("");
+    $("genNotes").focus();
+  });
+
+  $("genCancelBtn").addEventListener("click", () => {
+    $("genPanel").hidden = true;
+    $("genBtn").disabled = false;
+  });
+
+  $("regenBtn").addEventListener("click", () => $("genBtn").click());
+
+  $("genRunBtn").addEventListener("click", runGenerate);
+
+  $("genNotes").addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") { event.preventDefault(); runGenerate(); }
+    if (event.key === "Escape") { event.preventDefault(); $("genCancelBtn").click(); }
+  });
+
+  async function runGenerate() {
+    $("genPanel").hidden = true;
+    $("genRunBtn").disabled = true;
+    $("genBtn").disabled = true;
+    $("regenBtn").disabled = true;
+    setStatus("Searching for what this company asks, then writing the interview. This takes up to a minute…");
 
     try {
-      await window.Voice.speak(item.q, $("voiceSelect").value);
+      const resume = window.Resume.latestVersion(jobId)?.latex || window.Resume.getBase();
+      const letter = window.Cover.latestVersion(jobId)?.latex || null;
+      const result = await window.Interviews.generate(job, resume, letter, $("genNotes").value);
+
+      window.Interviews.save(jobId, result);
+      renderInterview();
+
+      const reported = (result.sections || [])
+        .flatMap((s) => s.questions || []).filter((q) => q.reported).length;
+      setStatus(
+        `${result.total} questions ready` +
+        (reported ? ` — ${reported} reported by candidates at this company.` : ", none company-specific: nothing was found for this employer, so these are the standard ones for the role."),
+        "ok",
+      );
     } catch (e) {
-      status.textContent = e.message;
-      status.className = "status error";
+      setStatus(e.message, "error");
     } finally {
-      button.disabled = false;
-      $("playLabel").textContent = window.Voice.isCached(item.q, $("voiceSelect").value)
-        ? "Play again" : "Play question";
+      $("genRunBtn").disabled = false;
+      $("genBtn").disabled = false;
+      $("regenBtn").disabled = false;
     }
   }
 
-  function step(by) {
-    window.Voice.stop();
-    const next = run.at + by;
-    if (next < 0) return;
-    if (next >= run.flat.length) return finish();
-    run.at = next;
-    renderQuestion();
-  }
-
-  function finish() {
-    window.Voice.stop();
-    markDone(run.version.id);
-    $("runScreen").hidden = true;
-    $("doneScreen").hidden = false;
-    $("doneTitle").textContent = `${run.version.name} — done`;
-    $("doneText").textContent =
-      "Now do the one thing that actually helps: pick the three questions you stumbled on and say those answers out loud again, without reading.";
-    renderVersions();
-  }
-
-  $("playBtn").addEventListener("click", play);
-  $("nextBtn").addEventListener("click", () => step(1));
-  $("prevBtn").addEventListener("click", () => step(-1));
-
-  $("tipBtn").addEventListener("click", () => {
-    const tip = $("tipText");
-    tip.hidden = !tip.hidden;
-    $("tipBtn").textContent = tip.hidden ? "Show what they want" : "Hide";
-  });
-
-  $("quitBtn").addEventListener("click", () => {
-    if (!confirm("Stop here and go back to the list?")) return;
-    window.Voice.stop();
-    $("runScreen").hidden = true;
-    $("pickScreen").hidden = false;
-    renderVersions();
-  });
-
-  $("againBtn").addEventListener("click", () => startRun(run.version));
-  $("otherBtn").addEventListener("click", () => {
-    $("doneScreen").hidden = true;
-    $("pickScreen").hidden = false;
-  });
-
-  // Space plays, arrows move — so she can keep her eyes up and answer out loud.
-  document.addEventListener("keydown", (event) => {
-    if ($("runScreen").hidden) return;
-    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName);
-    if (typing) return;
-    if (event.key === " ") { event.preventDefault(); play(); }
-    if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
-    if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
-  });
+  $("printBtn").addEventListener("click", () => window.print());
 
   /* ------------------------------------------------------------------ misc */
 
@@ -268,7 +332,7 @@
     node.textContent = message;
     node.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { node.hidden = true; }, 2400);
+    toastTimer = setTimeout(() => { node.hidden = true; }, 2600);
   }
 
   window.addEventListener("jobs-sync-status", (event) => {
@@ -278,12 +342,30 @@
     dot.title = !online ? "Offline — changes save locally" : error ? `Sync problem: ${error}` : "Synced";
   });
 
-  // The voice list is synced, so it can arrive after the page has drawn.
-  window.addEventListener("jobs-synced", renderVoices);
+  window.addEventListener("jobs-synced", async () => {
+    await window.Data.load();
+    renderVoices();
+    if (jobId) renderInterview(); else renderJobPicker();
+  });
+
+  /* ------------------------------------------------------------------ boot */
 
   (async function init() {
     await window.Sync.ready;
+    await window.Data.load();
     renderVoices();
-    renderVersions();
+
+    job = jobId ? window.Data.listJobs().find((j) => j.id === jobId) || null : null;
+
+    if (!job) {
+      jobId = null;
+      $("pickScreen").hidden = false;
+      renderJobPicker();
+      return;
+    }
+
+    $("jobScreen").hidden = false;
+    renderJob();
+    renderInterview();
   })();
 })();

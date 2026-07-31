@@ -102,6 +102,9 @@
     const link = safeUrl(job.link);
     if (link) { $("jobLink").href = link; $("jobLink").hidden = false; }
 
+    $("interviewLink").href = `mock.html?job=${encodeURIComponent(job.id)}`;
+    $("interviewLink").title = `Interview questions for ${job.company || "this job"}`;
+
     if ((job.description || "").trim()) {
       $("postingText").textContent = job.description;
       $("postingBox").hidden = false;

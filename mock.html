@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mock Interview — Jobs</title>
+  <title>Interview — Jobs</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%238b5cf6' d='M16 3a5 5 0 0 1 5 5v6a5 5 0 0 1-10 0V8a5 5 0 0 1 5-5zm-9 11h2a7 7 0 0 0 14 0h2a9 9 0 0 1-8 8.94V26h4v2H11v-2h4v-3.06A9 9 0 0 1 7 14z'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <link rel="stylesheet" href="css/style.css?v=12" />
-  <link rel="stylesheet" href="css/mock.css?v=12" />
+  <link rel="stylesheet" href="css/style.css?v=13" />
+  <link rel="stylesheet" href="css/mock.css?v=13" />
 </head>
 <body>
   <header class="topbar">
@@ -18,125 +18,143 @@
       <a class="icon-btn" href="index.html" title="Back to jobs" aria-label="Back to jobs">
         <span class="material-symbols-rounded">arrow_back</span>
       </a>
-      <span class="brand-name">Mock Interview</span>
-      <span id="runCount" class="brand-count"></span>
+      <span class="brand-name">Interview</span>
+      <span id="qCount" class="brand-count"></span>
     </div>
     <div class="topbar-actions">
       <span id="syncDot" class="sync-dot" title="Sync status"></span>
-      <a class="icon-btn" href="interview.html" title="Study the answers" aria-label="Study the answers">
+      <button id="printBtn" class="icon-btn" title="Print" aria-label="Print">
+        <span class="material-symbols-rounded">print</span>
+      </button>
+      <a class="icon-btn" href="interview.html" title="General practice questions" aria-label="General practice questions">
         <span class="material-symbols-rounded">school</span>
       </a>
     </div>
   </header>
 
   <main class="view">
-    <!-- ------------------------------------------------------------ voice -->
-    <section class="voice-bar">
-      <div class="voice-pick">
-        <span class="material-symbols-rounded">record_voice_over</span>
-        <select id="voiceSelect" aria-label="Interviewer voice"></select>
-        <button id="testVoiceBtn" class="btn ghost small" type="button">Test</button>
-        <button id="addVoiceBtn" class="btn ghost small" type="button">
-          <span class="material-symbols-rounded">add</span> Voice
-        </button>
-        <button id="removeVoiceBtn" class="btn ghost small" type="button" hidden>Remove</button>
-      </div>
-      <p id="voiceStatus" class="hint"></p>
-
-      <form id="addVoiceForm" class="voice-form" hidden>
-        <label class="field">
-          <span class="label">Name</span>
-          <input id="voiceName" type="text" placeholder="e.g. Sarah — friendly manager" autocomplete="off" />
-        </label>
-        <label class="field">
-          <span class="label">ElevenLabs voice ID</span>
-          <input id="voiceId" type="text" placeholder="e.g. 21m00Tcm4TlvDq8ikWAM" autocomplete="off" spellcheck="false" />
-        </label>
-        <div class="voice-form-actions">
-          <button type="submit" class="btn primary small">Add voice</button>
-          <button type="button" id="cancelVoiceBtn" class="btn ghost small">Cancel</button>
-        </div>
-        <p class="hint">
-          In ElevenLabs, open <strong>Voices</strong>, pick a voice, and copy its <strong>Voice ID</strong>.
-          The ID is not secret and syncs to your other devices; the API key stays on this one.
-        </p>
-      </form>
-    </section>
-
-    <!-- --------------------------------------------------------- versions -->
-    <section id="pickScreen">
-      <h1 class="pick-title">Pick an interview</h1>
+    <!-- ---------------------------------------------------- pick a job --- -->
+    <section id="pickScreen" hidden>
+      <h1 class="pick-title">Which job is the interview for?</h1>
       <p class="pick-sub">
-        Five different employers, five sections each, twenty questions. Do them one at a time —
-        the point is to say the answers out loud, not to read them.
+        Claude reads the posting, your resume and your cover letter, looks up what
+        candidates say this company actually asks, and writes the interview for it.
       </p>
-      <div id="versionList" class="version-list"></div>
+      <div id="jobList" class="job-list"></div>
     </section>
 
-    <!-- ------------------------------------------------------------- run -->
-    <section id="runScreen" hidden>
-      <div class="run-head">
-        <div>
-          <span id="runName" class="run-name"></span>
-          <span id="runSection" class="run-section"></span>
+    <!-- --------------------------------------------------------- the job -- -->
+    <section id="jobScreen" hidden>
+      <div class="job-card">
+        <div class="job-card-main">
+          <div class="job-card-head">
+            <h1 id="jobTitle"></h1>
+            <span id="jobCategory" class="chip" hidden></span>
+          </div>
+          <p id="jobCompany" class="job-company"></p>
+          <div id="jobFacts" class="job-facts"></div>
         </div>
-        <button id="quitBtn" class="btn ghost small" type="button">Finish early</button>
+        <a id="jobLink" class="btn ghost" target="_blank" rel="noopener noreferrer" hidden>
+          <span class="material-symbols-rounded">open_in_new</span> Posting
+        </a>
       </div>
 
-      <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
-      <p id="progressText" class="progress-text"></p>
-
-      <div class="stage">
-        <p id="questionText" class="question"></p>
-
-        <div class="stage-actions">
-          <button id="playBtn" class="btn primary">
-            <span class="material-symbols-rounded">volume_up</span>
-            <span id="playLabel">Play question</span>
+      <!-- ------------------------------------------------------- voices -- -->
+      <div class="voice-bar">
+        <div class="voice-pick">
+          <span class="material-symbols-rounded">record_voice_over</span>
+          <select id="voiceSelect" aria-label="Voice used to read the questions"></select>
+          <button id="testVoiceBtn" class="btn ghost small" type="button">Test</button>
+          <button id="addVoiceBtn" class="btn ghost small" type="button">
+            <span class="material-symbols-rounded">add</span> Voice
           </button>
-          <button id="tipBtn" class="btn ghost small" type="button">Show what they want</button>
+          <button id="removeVoiceBtn" class="btn ghost small" type="button" hidden>Remove</button>
         </div>
+        <p id="voiceStatus" class="hint"></p>
 
-        <p id="tipText" class="tip" hidden></p>
-        <p id="playStatus" class="status"></p>
+        <form id="addVoiceForm" class="voice-form" hidden>
+          <label class="field">
+            <span class="label">Name</span>
+            <input id="voiceName" type="text" placeholder="e.g. American — female" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="label">ElevenLabs voice ID</span>
+            <input id="voiceId" type="text" placeholder="e.g. 21m00Tcm4TlvDq8ikWAM" autocomplete="off" spellcheck="false" />
+          </label>
+          <div class="voice-form-actions">
+            <button type="submit" class="btn primary small">Add voice</button>
+            <button type="button" id="cancelVoiceBtn" class="btn ghost small">Cancel</button>
+          </div>
+          <p class="hint">
+            ElevenLabs → <strong>Voices</strong> → pick one → copy its <strong>Voice ID</strong>.
+            Add several accents and switch between them to get used to hearing the questions.
+          </p>
+        </form>
       </div>
 
-      <div class="run-nav">
-        <button id="prevBtn" class="btn ghost" type="button">
-          <span class="material-symbols-rounded">arrow_back</span> Back
+      <!-- ------------------------------------------------------ generate -- -->
+      <div class="gen-bar">
+        <button id="genBtn" class="btn primary">
+          <span class="material-symbols-rounded">auto_awesome</span>
+          <span id="genLabel">Build the interview</span>
         </button>
-        <label class="checkbox auto-play">
-          <input id="autoPlay" type="checkbox" />
-          <span>Read each question automatically</span>
+        <button id="regenBtn" class="btn ghost small" type="button" hidden>Build it again</button>
+        <span class="spacer"></span>
+        <span id="genMeta" class="pane-note"></span>
+      </div>
+
+      <div id="genPanel" class="gen-panel" hidden>
+        <label class="field">
+          <span class="label">Anything Claude should focus on? <em>(optional)</em></span>
+          <textarea id="genNotes" rows="3" placeholder="e.g. This is a second interview. Or: they said the manager will ask about stock and closing."></textarea>
         </label>
-        <button id="nextBtn" class="btn primary" type="button">
-          Next <span class="material-symbols-rounded">arrow_forward</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- ----------------------------------------------------------- done -->
-    <section id="doneScreen" hidden>
-      <div class="done-card">
-        <span class="material-symbols-rounded done-icon">check_circle</span>
-        <h2 id="doneTitle">That's the whole interview</h2>
-        <p id="doneText" class="done-text"></p>
-        <div class="done-actions">
-          <button id="againBtn" class="btn primary" type="button">Run it again</button>
-          <button id="otherBtn" class="btn ghost" type="button">Try a different one</button>
+        <ul class="gen-facts">
+          <li>Searches the web for what candidates report being asked <strong>at this company</strong>.</li>
+          <li>Sends the posting, your resume and your cover letter. <strong>Not your contact details.</strong></li>
+          <li>Claude <strong>Opus 5</strong>, high effort, with web search — a few cents and up to a minute.</li>
+        </ul>
+        <div class="gen-actions">
+          <button id="genRunBtn" class="btn primary" type="button">
+            <span class="material-symbols-rounded">search</span> Research and write it
+          </button>
+          <button id="genCancelBtn" class="btn ghost small" type="button">Cancel</button>
         </div>
+      </div>
+
+      <p id="genStatus" class="status"></p>
+
+      <!-- -------------------------------------------------------- result -- -->
+      <div id="result" hidden>
+        <div id="researchBox" class="research" hidden>
+          <h2>What this company asks</h2>
+          <p id="researchText"></p>
+          <div id="sourceList" class="sources"></div>
+        </div>
+
+        <div id="sections"></div>
+      </div>
+
+      <div id="emptyState" class="empty">
+        <span class="material-symbols-rounded empty-icon">quiz</span>
+        <p class="empty-title">No interview yet</p>
+        <p class="empty-sub">
+          Press <strong>Build the interview</strong> and Claude researches this company,
+          then writes 15 questions with answers in your own words.
+        </p>
       </div>
     </section>
   </main>
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="js/store.js?v=12"></script>
-  <script src="js/sync.js?v=12"></script>
-  <script src="js/ui.js?v=12"></script>
-  <script src="js/data.js?v=12"></script>
-  <script src="js/voice.js?v=12"></script>
-  <script src="js/mock-data.js?v=12"></script>
-  <script src="js/mock.js?v=12"></script>
+  <script src="js/store.js?v=13"></script>
+  <script src="js/sync.js?v=13"></script>
+  <script src="js/ui.js?v=13"></script>
+  <script src="js/data.js?v=13"></script>
+  <script src="js/resume.js?v=13"></script>
+  <script src="js/cover.js?v=13"></script>
+  <script src="js/voice.js?v=13"></script>
+  <script src="js/interviews.js?v=13"></script>
+  <script src="js/mock.js?v=13"></script>
 </body>
 </html>
