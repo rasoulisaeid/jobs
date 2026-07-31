@@ -53,20 +53,26 @@
 
   function renderVoices() {
     const voices = window.Voice.listVoices();
-    const select = $("voiceSelect");
 
-    select.replaceChildren();
-    if (!voices.length) {
-      select.append(new Option("No voice yet — add one", ""));
-      select.disabled = true;
-    } else {
-      select.disabled = false;
-      for (const v of voices) select.append(new Option(v.name, v.id));
-      select.value = window.Voice.getSelected();
+    for (const [id, chosen] of [
+      ["voiceSelect", window.Voice.getSelected()],
+      ["answerVoiceSelect", window.Voice.getAnswerVoice()],
+    ]) {
+      const select = $(id);
+      select.replaceChildren();
+      if (!voices.length) {
+        select.append(new Option("No voice yet — add one", ""));
+        select.disabled = true;
+      } else {
+        select.disabled = false;
+        for (const v of voices) select.append(new Option(v.name, v.id));
+        select.value = chosen;
+      }
     }
 
     $("removeVoiceBtn").hidden = !voices.length;
     $("testVoiceBtn").disabled = !voices.length;
+    $("testAnswerBtn").disabled = !voices.length;
 
     const status = $("voiceStatus");
     if (!window.Voice.hasKey()) {
@@ -82,6 +88,20 @@
   }
 
   $("voiceSelect").addEventListener("change", (event) => window.Voice.setSelected(event.target.value));
+  $("answerVoiceSelect").addEventListener("change", (event) => window.Voice.setAnswerVoice(event.target.value));
+
+  $("testAnswerBtn").addEventListener("click", async (event) => {
+    await playText(
+      "I have two years of experience in retail sales, and I enjoy helping customers choose.",
+      event.currentTarget, $("answerVoiceSelect").value);
+  });
+
+  $("clearAudioBtn").addEventListener("click", async () => {
+    if (!confirm("Delete the saved audio?\n\nThe questions will be read again next time, which uses ElevenLabs credits.")) return;
+    await window.Voice.clearSaved();
+    renderSaved();
+    toast("Saved audio cleared");
+  });
 
   $("addVoiceBtn").addEventListener("click", () => {
     $("addVoiceForm").hidden = false;
@@ -123,18 +143,30 @@
     } catch (e) { toast(e.message); } finally { button.disabled = false; }
   });
 
-  async function playQuestion(text, button) {
+  async function playText(text, button, voiceId) {
+    // Not every caller is an icon button (the Test buttons are plain).
     const icon = button.querySelector(".material-symbols-rounded");
+    const was = icon ? icon.textContent : null;
     button.disabled = true;
-    icon.textContent = "graphic_eq";
+    if (icon) icon.textContent = "graphic_eq";
     try {
-      await window.Voice.speak(text, $("voiceSelect").value);
+      await window.Voice.speak(text, voiceId);
     } catch (e) {
       toast(e.message);
     } finally {
       button.disabled = false;
-      icon.textContent = "volume_up";
+      if (icon) icon.textContent = was;
+      renderSaved();
     }
+  }
+
+  async function renderSaved() {
+    const { count, bytes } = await window.Voice.savedSize();
+    const node = $("savedAudio");
+    $("clearAudioBtn").hidden = count === 0;
+    node.textContent = count
+      ? `${count} clip${count === 1 ? "" : "s"} saved (${(bytes / 1024 / 1024).toFixed(1)} MB) — replaying these is free.`
+      : "";
   }
 
   /* ------------------------------------------------------------- the job */
@@ -243,9 +275,9 @@
             el("h3", { class: "qa-q", text: item.question }),
             el("button", {
               class: "qa-play", type: "button",
-              title: "Hear this question",
+              title: "Hear the question",
               "aria-label": `Play question ${n}`,
-              onclick: (event) => playQuestion(item.question, event.currentTarget),
+              onclick: (event) => playText(item.question, event.currentTarget, $("voiceSelect").value),
             }, el("span", { class: "material-symbols-rounded", text: "volume_up" })),
           ),
           item.reported
@@ -253,7 +285,16 @@
                 el("span", { class: "material-symbols-rounded", text: "verified" }), "Reported at this company")
             : null,
           el("div", { class: "qa-answer" },
-            el("span", { class: "qa-label", text: "Say something like" }),
+            el("div", { class: "qa-answer-head" },
+              el("span", { class: "qa-label", text: "Say something like" }),
+              el("button", {
+                class: "qa-answer-play", type: "button",
+                title: "Hear the answer in your own voice",
+                "aria-label": `Play answer ${n}`,
+                onclick: (event) => playText(item.answer, event.currentTarget, $("answerVoiceSelect").value),
+              },
+                el("span", { class: "material-symbols-rounded", text: "graphic_eq" }),
+                "Hear it")),
             el("p", { text: item.answer })),
           item.why ? el("p", { class: "qa-why", text: item.why }) : null,
         ));
@@ -353,7 +394,10 @@
   (async function init() {
     await window.Sync.ready;
     await window.Data.load();
+    window.Voice.ensureSeeded();     // Sahar's voice, added once per device
+    await window.Voice.ready;        // so isCached() knows what is on disk
     renderVoices();
+    renderSaved();
 
     job = jobId ? window.Data.listJobs().find((j) => j.id === jobId) || null : null;
 

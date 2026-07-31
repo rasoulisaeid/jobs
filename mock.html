@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <link rel="stylesheet" href="css/style.css?v=13" />
-  <link rel="stylesheet" href="css/mock.css?v=13" />
+  <link rel="stylesheet" href="css/style.css?v=14" />
+  <link rel="stylesheet" href="css/mock.css?v=14" />
 </head>
 <body>
   <header class="topbar">
@@ -61,16 +61,35 @@
 
       <!-- ------------------------------------------------------- voices -- -->
       <div class="voice-bar">
-        <div class="voice-pick">
-          <span class="material-symbols-rounded">record_voice_over</span>
+        <div class="voice-row">
+          <span class="voice-role">
+            <span class="material-symbols-rounded">record_voice_over</span> Interviewer
+          </span>
           <select id="voiceSelect" aria-label="Voice used to read the questions"></select>
           <button id="testVoiceBtn" class="btn ghost small" type="button">Test</button>
+        </div>
+
+        <div class="voice-row">
+          <span class="voice-role">
+            <span class="material-symbols-rounded">face_2</span> Your answers
+          </span>
+          <select id="answerVoiceSelect" aria-label="Voice used to read the answers"></select>
+          <button id="testAnswerBtn" class="btn ghost small" type="button">Test</button>
+        </div>
+
+        <div class="voice-row voice-manage">
           <button id="addVoiceBtn" class="btn ghost small" type="button">
-            <span class="material-symbols-rounded">add</span> Voice
+            <span class="material-symbols-rounded">add</span> Add a voice
           </button>
-          <button id="removeVoiceBtn" class="btn ghost small" type="button" hidden>Remove</button>
+          <button id="removeVoiceBtn" class="btn ghost small" type="button" hidden>
+            Remove the interviewer voice
+          </button>
+          <button id="clearAudioBtn" class="btn ghost small" type="button" hidden>
+            Clear saved audio
+          </button>
         </div>
         <p id="voiceStatus" class="hint"></p>
+        <p id="savedAudio" class="hint ok"></p>
 
         <form id="addVoiceForm" class="voice-form" hidden>
           <label class="field">
@@ -147,14 +166,14 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="js/store.js?v=13"></script>
-  <script src="js/sync.js?v=13"></script>
-  <script src="js/ui.js?v=13"></script>
-  <script src="js/data.js?v=13"></script>
-  <script src="js/resume.js?v=13"></script>
-  <script src="js/cover.js?v=13"></script>
-  <script src="js/voice.js?v=13"></script>
-  <script src="js/interviews.js?v=13"></script>
-  <script src="js/mock.js?v=13"></script>
+  <script src="js/store.js?v=14"></script>
+  <script src="js/sync.js?v=14"></script>
+  <script src="js/ui.js?v=14"></script>
+  <script src="js/data.js?v=14"></script>
+  <script src="js/resume.js?v=14"></script>
+  <script src="js/cover.js?v=14"></script>
+  <script src="js/voice.js?v=14"></script>
+  <script src="js/interviews.js?v=14"></script>
+  <script src="js/mock.js?v=14"></script>
 </body>
 </html>

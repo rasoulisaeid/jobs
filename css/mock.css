@@ -54,10 +54,20 @@
   padding: 13px 16px;
   margin-top: 16px;
 }
-.voice-pick { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.voice-pick > .material-symbols-rounded { color: var(--primary); }
-.voice-pick select { flex: 1; min-width: 170px; }
+.voice-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.voice-row select { flex: 1; min-width: 170px; }
+.voice-row:last-of-type { margin-bottom: 0; }
+
+.voice-role {
+  display: inline-flex; align-items: center; gap: 6px;
+  width: 130px; flex: none;
+  font-size: 13px; font-weight: 800; color: var(--soft);
+}
+.voice-role .material-symbols-rounded { font-size: 18px; color: var(--primary); }
+
+.voice-manage { padding-top: 4px; }
 .voice-bar .hint { margin: 8px 0 0; }
+#savedAudio:empty { display: none; }
 
 .voice-form {
   margin-top: 13px; padding-top: 13px;
@@ -176,12 +186,26 @@
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
   padding: 11px 14px;
 }
+.qa-answer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 5px;
+}
 .qa-label {
-  display: block;
   font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); margin-bottom: 4px;
+  color: var(--muted);
 }
 .qa-answer p { margin: 0; font-size: 15px; line-height: 1.55; }
+
+/* Her own voice reading her own answer back. */
+.qa-answer-play {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: none; background: none; color: var(--primary-2);
+  border-radius: 999px; padding: 3px 10px 3px 7px;
+  font-size: 12px; font-weight: 800; white-space: nowrap;
+}
+.qa-answer-play .material-symbols-rounded { font-size: 16px; }
+.qa-answer-play:hover { background: var(--primary-soft); }
+.qa-answer-play:disabled { opacity: .6; cursor: default; }
 
 .qa-why {
   margin: 9px 0 0 37px;
@@ -207,8 +231,8 @@
 
 @media print {
   @page { size: letter; margin: 0.6in; }
-  .topbar, .voice-bar, .gen-bar, .gen-panel, .qa-play, #genStatus, .toast,
-  #pickScreen, .empty { display: none !important; }
+  .topbar, .voice-bar, .gen-bar, .gen-panel, .qa-play, .qa-answer-play,
+  #genStatus, .toast, #pickScreen, .empty { display: none !important; }
   html, body { background: #fff; }
   .view { padding: 0; max-width: none; }
   .job-card, .qa { box-shadow: none; break-inside: avoid; page-break-inside: avoid; }

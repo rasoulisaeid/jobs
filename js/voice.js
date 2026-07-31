@@ -10,14 +10,90 @@
  */
 (function () {
   const API = "https://api.elevenlabs.io/v1/text-to-speech";
-  const KEY_CELL = "jobs:local:elevenKey";     // this device only
-  const PICK_CELL = "jobs:local:voicePick";    // per-device preference
-  const STORE_KEY = "voices";                  // synced
+  const KEY_CELL = "jobs:local:elevenKey";       // this device only
+  const PICK_CELL = "jobs:local:voicePick";      // per-device preference
+  const ANSWER_CELL = "jobs:local:answerVoice";  // per-device preference
+  const SEEDED_CELL = "jobs:local:voiceSeeded";  // so a removal stays removed
+  const STORE_KEY = "voices";                    // synced
 
   const DEFAULT_MODEL = "eleven_multilingual_v2";
 
-  const cache = new Map();      // `${voiceId}::${text}` -> object URL
+  // Sahar's own cloned voice — the default for reading the answers back, so
+  // she hears the sentences in her own voice before she has to say them.
+  const SAHAR_ID = "jue5C5v9CO3kJzxK6LNV";
+
+  const cache = new Map();      // `${voiceId}::${text}` -> object URL, this session
+  const savedKeys = new Set();  // what is already on disk, for a sync isCached()
   let current = null;           // the Audio element that is playing
+
+  /* ------------------------------------------------- the clip store ------ */
+
+  /* Generated audio is kept in IndexedDB, not just in memory, because every
+   * regeneration costs ElevenLabs credits and a page reload would otherwise
+   * throw away everything. Blobs go in as-is — base64 in localStorage would
+   * inflate them by a third and blow the 5MB quota after a couple of jobs.
+   *
+   * Device-local on purpose: it is large, and it is derived data that can
+   * always be made again. */
+  const DB_NAME = "jobs-voice";
+  const STORE = "clips";
+  let dbPromise = null;
+
+  function db() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve) => {
+      if (typeof indexedDB === "undefined") return resolve(null);
+      let req;
+      try { req = indexedDB.open(DB_NAME, 1); } catch (e) { return resolve(null); }
+      req.onupgradeneeded = () => {
+        if (!req.result.objectStoreNames.contains(STORE)) req.result.createObjectStore(STORE);
+      };
+      req.onsuccess = () => resolve(req.result);
+      // Private mode and blocked storage both land here — fall back to memory.
+      req.onerror = () => resolve(null);
+      req.onblocked = () => resolve(null);
+    });
+    return dbPromise;
+  }
+
+  function withStore(mode, run) {
+    return db().then((d) => {
+      if (!d) return null;
+      return new Promise((resolve) => {
+        let tx;
+        try { tx = d.transaction(STORE, mode); } catch (e) { return resolve(null); }
+        const result = run(tx.objectStore(STORE));
+        tx.oncomplete = () => resolve(result && "result" in result ? result.result : null);
+        tx.onerror = () => resolve(null);
+        tx.onabort = () => resolve(null);
+      });
+    }).catch(() => null);
+  }
+
+  const clipGet = (key) => withStore("readonly", (store) => store.get(key));
+  const clipPut = (key, blob) => withStore("readwrite", (store) => store.put(blob, key));
+  const clipKeys = () => withStore("readonly", (store) => store.getAllKeys());
+  const clipBlobs = () => withStore("readonly", (store) => store.getAll());
+
+  async function clearSaved() {
+    await withStore("readwrite", (store) => store.clear());
+    savedKeys.clear();
+    for (const url of cache.values()) URL.revokeObjectURL(url);
+    cache.clear();
+    notify();
+  }
+
+  async function savedSize() {
+    const blobs = (await clipBlobs()) || [];
+    return { count: blobs.length, bytes: blobs.reduce((n, b) => n + (b?.size || 0), 0) };
+  }
+
+  // Loaded once at start so isCached() can stay synchronous for the UI.
+  const ready = (async () => {
+    const keys = (await clipKeys()) || [];
+    for (const k of keys) savedKeys.add(k);
+    return savedKeys.size;
+  })();
 
   const listeners = [];
   const onChange = (fn) => { listeners.push(fn); return () => listeners.splice(listeners.indexOf(fn), 1); };
@@ -69,6 +145,7 @@
   function removeVoice(id) {
     window.Store.set(STORE_KEY, listVoices().filter((v) => v.id !== id));
     if (getSelected() === id) setSelected("");
+    if (getAnswerVoice() === id) setAnswerVoice("");
     notify();
   }
 
@@ -81,19 +158,55 @@
     notify();
   }
 
-  // Which voice this device is using — a preference, so it stays local.
+  /* Adds Sahar's voice once, the first time this device loads the page. The
+   * flag means removing it from the list makes it stay removed instead of
+   * reappearing on the next visit. */
+  function ensureSeeded() {
+    let done = "";
+    try { done = localStorage.getItem(SEEDED_CELL) || ""; } catch (e) {}
+    if (done) return false;
+    try { localStorage.setItem(SEEDED_CELL, "1"); } catch (e) {}
+
+    const list = listVoices();
+    if (list.some((v) => v.id === SAHAR_ID)) return false;
+    window.Store.set(STORE_KEY, [...list, { id: SAHAR_ID, name: "Sahar — your voice" }]);
+    notify();
+    return true;
+  }
+
+  // Which voice reads the interviewer's questions. A preference, so it is local.
   function getSelected() {
     let saved = "";
     try { saved = localStorage.getItem(PICK_CELL) || ""; } catch (e) {}
     const list = listVoices();
     if (saved && list.some((v) => v.id === saved)) return saved;
-    return list.length ? list[0].id : "";
+    // With nothing chosen, an interviewer should not default to her own voice.
+    const notHer = list.find((v) => v.id !== SAHAR_ID);
+    return (notHer || list[0])?.id || "";
   }
 
   function setSelected(id) {
     try {
       if (id) localStorage.setItem(PICK_CELL, id);
       else localStorage.removeItem(PICK_CELL);
+    } catch (e) {}
+    notify();
+  }
+
+  // Which voice reads her answers back. Defaults to her own.
+  function getAnswerVoice() {
+    let saved = "";
+    try { saved = localStorage.getItem(ANSWER_CELL) || ""; } catch (e) {}
+    const list = listVoices();
+    if (saved && list.some((v) => v.id === saved)) return saved;
+    if (list.some((v) => v.id === SAHAR_ID)) return SAHAR_ID;
+    return list.length ? list[0].id : "";
+  }
+
+  function setAnswerVoice(id) {
+    try {
+      if (id) localStorage.setItem(ANSWER_CELL, id);
+      else localStorage.removeItem(ANSWER_CELL);
     } catch (e) {}
     notify();
   }
@@ -110,6 +223,15 @@
   async function fetchAudio(text, voiceId) {
     const cacheKey = `${voiceId}::${text}`;
     if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+    // On disk from a previous visit — no request, no credits.
+    const saved = await clipGet(cacheKey);
+    if (saved) {
+      const url = URL.createObjectURL(saved);
+      cache.set(cacheKey, url);
+      savedKeys.add(cacheKey);
+      return url;
+    }
 
     const key = getKey();
     if (!key) throw new Error("No ElevenLabs API key saved. Add one under Settings on the jobs page.");
@@ -142,8 +264,12 @@
       throw new Error(detail || `ElevenLabs error — HTTP ${res.status}`);
     }
 
-    const url = URL.createObjectURL(await res.blob());
+    const blob = await res.blob();
+    await clipPut(cacheKey, blob);          // keep it, so this is paid for once
+    savedKeys.add(cacheKey);
+    const url = URL.createObjectURL(blob);
     cache.set(cacheKey, url);
+    notify();
     return url;
   }
 
@@ -160,13 +286,18 @@
     });
   }
 
-  const isCached = (text, voiceId) => cache.has(`${voiceId || getSelected()}::${text}`);
+  function isCached(text, voiceId) {
+    const key = `${voiceId || getSelected()}::${text}`;
+    return cache.has(key) || savedKeys.has(key);
+  }
+
   const isPlaying = () => Boolean(current);
 
   window.Voice = {
-    DEFAULT_MODEL,
+    DEFAULT_MODEL, SAHAR_ID, ready,
     getKey, hasKey, keyPreview, setKey,
-    listVoices, addVoice, removeVoice, renameVoice, getSelected, setSelected,
-    speak, stop, isCached, isPlaying, onChange,
+    listVoices, addVoice, removeVoice, renameVoice, ensureSeeded,
+    getSelected, setSelected, getAnswerVoice, setAnswerVoice,
+    speak, stop, isCached, isPlaying, savedSize, clearSaved, onChange,
   };
 })();
