@@ -289,6 +289,23 @@
     }
   }
 
+  function renderElevenStatus() {
+    const status = $("elevenStatus");
+    const hasKey = window.Voice.hasKey();
+    $("elevenKey").value = "";
+    $("removeElevenBtn").hidden = !hasKey;
+
+    if (hasKey) {
+      $("elevenKey").placeholder = "Leave blank to keep the saved key";
+      status.className = "hint ok";
+      status.textContent = `✓ Saved: ${window.Voice.keyPreview()} — reads the mock interview questions aloud.`;
+    } else {
+      $("elevenKey").placeholder = "sk_…";
+      status.className = "hint";
+      status.textContent = "Optional — only needed to hear the mock interview questions read out.";
+    }
+  }
+
   function renderEffortOptions(preferred) {
     const model = window.Extract.findModel($("model").value);
     const effort = $("effort");
@@ -319,6 +336,7 @@
     model.value = prefs.model;
 
     renderKeyStatus();
+    renderElevenStatus();
     renderEffortOptions(prefs.effort);
     $("webSearch").checked = prefs.webSearch;
     renderCategories();
@@ -329,12 +347,14 @@
     event.preventDefault();
     try {
       if ($("apiKey").value.trim()) await window.Data.setApiKey($("apiKey").value);
+      if ($("elevenKey").value.trim()) window.Voice.setKey($("elevenKey").value);
       window.Data.setPrefs({
         model: $("model").value,
         effort: $("effort").disabled ? "medium" : $("effort").value,
         webSearch: $("webSearch").checked,
       });
       renderKeyStatus();
+      renderElevenStatus();
       $("settingsModal").close();
       toast("Settings saved");
     } catch (e) {
@@ -403,6 +423,13 @@
     await window.Data.setApiKey("");
     renderKeyStatus();
     toast("API key removed");
+  });
+
+  $("removeElevenBtn").addEventListener("click", () => {
+    if (!confirm("Remove the saved ElevenLabs API key?")) return;
+    window.Voice.setKey("");
+    renderElevenStatus();
+    toast("ElevenLabs key removed");
   });
 
   $("newCategoryBtn").addEventListener("click", async () => {

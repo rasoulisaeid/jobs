@@ -78,6 +78,26 @@ edit. **Print / Save as PDF** is the quickest route to an attachment;
 **Overleaf** typesets the real LaTeX (and uploads the resume to a third party to
 do it). `Edit the LaTeX source` opens the source if it needs a hand edit.
 
+### Mock interview
+
+The microphone icon opens `mock.html`: five interviews, five sections each,
+twenty questions apiece. The five are five different employers — a small
+boutique, a luxury flagship, a mall chain, a fashion store, and a second-round
+manager — because the same job title is interviewed very differently by each.
+Every version runs greeting → experience → the role → shop-floor situations →
+closing.
+
+One question fills the screen at a time, and **ElevenLabs reads it aloud** so
+it has to be answered out loud rather than skim-read. Add voice IDs at the top
+of the page (ElevenLabs → Voices → copy the Voice ID); the API key goes in
+**Settings** on the jobs page. Voice IDs sync — they are not secret. The key
+does not. Audio is cached per question for the session, so replaying costs
+nothing.
+
+Space plays, arrow keys move. **Show what they want** reveals what the
+interviewer is listening for, and stays hidden by default so it is practice
+rather than reading.
+
 ### Interview prep
 
 The graduation-cap icon opens a study page for jewelry sales associate
@@ -101,7 +121,9 @@ browser  ──►  localStorage  ──mirror──►  Firebase RTDB /jobs/ras
 | `jobs:v1:resumeVersions` | resumes tailored per job | yes |
 | `jobs:v1:coverBase` | the blank cover letter | yes |
 | `jobs:v1:coverVersions` | cover letters written per job | yes |
+| `jobs:v1:voices` | ElevenLabs voice IDs (not secret) | yes |
 | `jobs:local:apiKey` | the Claude API key | **no — this device only** |
+| `jobs:local:elevenKey` | the ElevenLabs API key | **no — this device only** |
 | `jobs:local:contact` | real address, phone, email | **no — this device only** |
 
 The Firebase node is readable without auth, and this repo is public *including
@@ -147,6 +169,7 @@ key from the browser entirely.
 ```
 index.html          jobs dashboard + modals
 apply.html          one job + the resume for it
+mock.html           spoken mock interview
 interview.html      interview prep page
 css/style.css       theme + shell (matches Systems)
 css/apply.css       apply page + the rendered "paper"
@@ -160,8 +183,11 @@ js/resume.js        resume + versions
 js/cover.js         cover letters, same API so apply.js shares one path
 js/latex-render.js  LaTeX subset -> HTML, with source offsets for inline editing
 js/tailor.js        tailoring + letter writing (Opus 5, high effort)
+js/voice.js         ElevenLabs text-to-speech + the voice list
+js/mock-data.js     5 interviews x 5 sections x 4 questions
 js/app.js           dashboard wiring
 js/apply.js         apply page wiring
+js/mock.js          mock interview logic
 js/interview.js     interview page logic
 
 tools/import-to-firebase.mjs   one-shot bulk import of an export file

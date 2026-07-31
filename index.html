@@ -23,6 +23,9 @@
       <a class="icon-btn" href="apply.html" title="Resume" aria-label="Resume">
         <span class="material-symbols-rounded">description</span>
       </a>
+      <a class="icon-btn" href="mock.html" title="Mock interview" aria-label="Mock interview">
+        <span class="material-symbols-rounded">mic</span>
+      </a>
       <a class="icon-btn" href="interview.html" title="Interview prep" aria-label="Interview prep">
         <span class="material-symbols-rounded">school</span>
       </a>
@@ -193,6 +196,15 @@
         </label>
 
         <label class="field">
+          <span class="label">ElevenLabs API key</span>
+          <div class="with-button">
+            <input id="elevenKey" type="password" placeholder="sk_…" autocomplete="off" />
+            <button type="button" id="removeElevenBtn" class="btn ghost small" hidden>Remove</button>
+          </div>
+          <span id="elevenStatus" class="hint"></span>
+        </label>
+
+        <label class="field">
           <span class="label">Model</span>
           <select id="model"></select>
           <span id="modelHint" class="hint"></span>
@@ -263,6 +275,7 @@
   <script src="js/sync.js?v=12"></script>
   <script src="js/ui.js?v=12"></script>
   <script src="js/data.js?v=12"></script>
+  <script src="js/voice.js?v=12"></script>
   <script src="js/extract.js?v=12"></script>
   <script src="js/app.js?v=12"></script>
 </body>

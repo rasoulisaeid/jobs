@@ -1,0 +1,139 @@
+/* Mock interview — the voice bar, the version picker, and the question stage. */
+
+/* ── voice bar ──────────────────────────────────────── */
+
+.voice-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.voice-pick { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.voice-pick > .material-symbols-rounded { color: var(--primary); }
+.voice-pick select { flex: 1; min-width: 180px; }
+.voice-bar .hint { margin: 8px 0 0; }
+
+.voice-form {
+  margin-top: 13px; padding-top: 13px;
+  border-top: 1px solid var(--border);
+  display: grid; gap: 10px;
+}
+.voice-form .field { display: grid; gap: 3px; }
+.voice-form .label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.voice-form-actions { display: flex; gap: 8px; }
+#voiceId { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+
+/* ── picking a version ──────────────────────────────── */
+
+.pick-title { font-size: 24px; margin-bottom: 6px; }
+.pick-sub { color: var(--muted); margin: 0 0 20px; max-width: 62ch; }
+
+.version-list {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+}
+
+.version-card {
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: 17px 18px;
+  display: grid; gap: 5px; align-content: start;
+  transition: transform .12s ease, border-color .12s ease;
+}
+.version-card:hover { transform: translateY(-2px); border-color: var(--primary); }
+.version-card.is-done { border-left: 4px solid var(--green); }
+
+.version-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.version-name { font-size: 17px; font-weight: 800; }
+.version-tick { color: var(--green-dark); font-size: 20px; }
+.version-tone { font-size: 13px; font-weight: 700; color: var(--primary-2); }
+.version-blurb { margin: 4px 0 0; font-size: 14px; line-height: 1.5; color: var(--soft); }
+.version-meta { margin-top: 6px; font-size: 12.5px; color: var(--muted); font-weight: 700; }
+
+/* ── the run ────────────────────────────────────────── */
+
+.run-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px;
+}
+.run-name { display: block; font-size: 19px; font-weight: 800; }
+.run-section { font-size: 14px; font-weight: 700; color: var(--primary-2); }
+
+.progress-track {
+  height: 8px; border-radius: 99px;
+  background: var(--border); overflow: hidden;
+}
+.progress-fill {
+  height: 100%; width: 0;
+  background: var(--primary); border-radius: 99px;
+  transition: width .25s ease;
+}
+.progress-text { margin: 6px 0 18px; font-size: 13px; color: var(--muted); font-weight: 700; }
+
+.stage {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  padding: 32px 30px;
+  min-height: 240px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+.question {
+  margin: 0;
+  font-size: 25px; line-height: 1.35; font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.stage-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.tip {
+  margin: 0;
+  background: var(--amber-soft); color: var(--amber-ink);
+  border-radius: var(--r-sm);
+  padding: 13px 15px;
+  font-size: 15px; line-height: 1.5;
+}
+
+.run-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 18px; flex-wrap: wrap;
+}
+.auto-play { font-size: 14px; color: var(--muted); }
+
+/* ── finished ───────────────────────────────────────── */
+
+.done-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  padding: 40px 32px;
+  text-align: center;
+  max-width: 560px; margin: 40px auto;
+}
+.done-icon {
+  font-size: 46px; color: var(--green-dark);
+  background: #dcfce7;
+  width: 74px; height: 74px; border-radius: 50%;
+  display: grid; place-items: center; margin: 0 auto 16px;
+}
+.done-card h2 { font-size: 21px; margin-bottom: 10px; }
+.done-text { color: var(--soft); margin: 0 0 22px; line-height: 1.55; }
+.done-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ── narrow screens ─────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .stage { padding: 24px 20px; min-height: 0; }
+  .question { font-size: 21px; }
+  .run-nav { justify-content: center; }
+  .auto-play { order: 3; width: 100%; justify-content: center; }
+}
