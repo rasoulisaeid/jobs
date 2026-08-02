@@ -18,8 +18,8 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
     />
-    <link rel="stylesheet" href="css/style.css?v=15" />
-    <link rel="stylesheet" href="css/interview.css?v=15" />
+    <link rel="stylesheet" href="css/style.css?v=16" />
+    <link rel="stylesheet" href="css/interview.css?v=16" />
   </head>
   <body>
     <header class="topbar">
@@ -33,6 +33,9 @@
         <input id="qSearch" type="search" placeholder="Search questions…" autocomplete="off" />
         <button id="toggleAll" class="btn ghost small">Expand all</button>
         <button id="resetProgress" class="btn ghost small">Reset ✓</button>
+        <a class="icon-btn" href="scenarios.html" title="Shop floor conversations" aria-label="Shop floor conversations">
+          <span class="material-symbols-rounded">storefront</span>
+        </a>
         <a class="icon-btn" href="index.html" title="Back to jobs" aria-label="Back to jobs">
           <span class="material-symbols-rounded">arrow_back</span>
         </a>
@@ -47,6 +50,12 @@
         you can answer it comfortably without reading.
       </p>
 
+      <p class="lede">
+        For the “what would you do if a customer…” questions, go to
+        <a href="scenarios.html">Shop floor</a> — ten customers walk in, and each one is a whole
+        conversation from the door to the door.
+      </p>
+
       <div class="progress-bar">
         <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
         <span id="progressText" class="progress-text"></span>
@@ -57,7 +66,6 @@
         <a href="#customers">Customers &amp; selling</a>
         <a href="#knowledge">Jewelry knowledge</a>
         <a href="#store">Working in the store</a>
-        <a href="#scenarios">Someone walks in</a>
         <a href="#ask">Questions to ask them</a>
         <a href="#checklist">Before you go</a>
       </nav>
@@ -474,237 +482,9 @@
         </details>
       </section>
 
-      <!-- ================================================= SHOP SCENARIOS -->
-      <section id="scenarios">
-        <h2><span class="num">5</span> Someone walks in</h2>
-
-        <p class="section-note">
-          Ten customers. The first five buy — the easy one first, the hard one last. The
-          last five leave without buying, each for a different reason, and every one of
-          those is still a good visit if you handle it well. Managers love these questions
-          because they show what you would actually <em>do</em> on the floor.
-        </p>
-
-        <details class="qa" data-id="s1">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">She points at a chain and says “I’ll take that one.”</span>
-            <span class="tag tag-buy">Buys</span>
-          </summary>
-          <div class="a">
-            <p class="scene">
-              She already decided before she came in. The only way to lose this sale is to
-              slow it down.
-            </p>
-            <p class="say">
-              “Lovely choice. Let me take it out for you. Would you like it in a gift box?
-              And I’ll put a gift receipt in, so they can change the length if they need to.”
-            </p>
-            <p class="tip">
-              Confirm, add <strong>one</strong> small useful thing — box, cleaning cloth, gift
-              receipt — and finish quickly. Do not start showing her other pieces. Fast, easy
-              service is what brings her back.
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s2">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">“It’s my wife’s birthday and I have no idea what to buy.”</span>
-            <span class="tag tag-buy">Buys</span>
-          </summary>
-          <div class="a">
-            <p class="scene">He wants to buy. He just needs someone to narrow it down for him.</p>
-            <p class="say">
-              “I can help with that. Tell me about her — does she wear gold or silver? Small
-              things every day, or something bigger for going out? Do you know her size?”
-              <br />Then: “Here are three I think she would like.”
-            </p>
-            <p class="tip">
-              Ask about <em>her</em>, not about the product. Show three, never ten — three is a
-              choice, ten is confusion. Always mention the gift receipt and the return window
-              before he pays.
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s3">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">A young couple looking for their first engagement ring</span>
-            <span class="tag tag-buy">Buys</span>
-          </summary>
-          <div class="a">
-            <p class="scene">
-              They have read about the 4Cs online, they are a little nervous, and money matters.
-            </p>
-            <p class="say">
-              “Congratulations. Can I ask what you would like to stay around? That way I only
-              show you rings you’ll be happy with. — Most people care how the diamond looks,
-              not what the paper says. A slightly smaller stone with a very good cut can look
-              brighter than a bigger one that isn’t cut as well.”
-            </p>
-            <p class="tip">
-              Ask the budget early and kindly, and never go above it twice. Explain each of the
-              4Cs in one sentence — cut is sparkle, colour is how white, clarity is how clean,
-              carat is size — and stop. Talk to both of them, not only the one paying.
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s4">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">She likes two, can’t choose, then says “I’ll think about it.”</span>
-            <span class="tag tag-buy">Buys</span>
-          </summary>
-          <div class="a">
-            <p class="scene">
-              “I’ll think about it” almost always hides a real reason. Find it politely and you
-              often still make the sale.
-            </p>
-            <p class="say">
-              “Of course. Can I ask — is it the price, or are you not sure which one suits you?”
-              <br />If it is the style: “Try this one on again by the window, in the daylight.
-              Which one did you keep coming back to?”
-              <br />If it is the price: “I can hold it for you for 24 hours, or we do layaway.”
-            </p>
-            <p class="tip">
-              Ask <strong>once</strong>, then respect the answer. If she still leaves, write down her
-              name and what she liked before she is out of the door.
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s5">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">“I found it cheaper online. Can you match the price?”</span>
-            <span class="tag tag-buy">Buys</span>
-          </summary>
-          <div class="a">
-            <p class="scene">The hardest of the five. He wants to buy — he wants to feel he was not overcharged.</p>
-            <p class="say">
-              “I understand, and I’m glad you checked. I can’t change the price myself, but here
-              is what you get buying it here: we size it for free, you can bring it in any time
-              for cleaning and a check on the stones, and if something goes wrong you speak to
-              me, not to a website.”
-            </p>
-            <p class="tip">
-              Never argue, and never say anything bad about the other shop. Sell the service, not
-              the sticker. Never promise a discount yourself — say “let me ask my manager.”
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s6">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">She is just looking. No plans to buy today.</span>
-            <span class="tag tag-nobuy">No sale today</span>
-          </summary>
-          <div class="a">
-            <p class="scene">Most people who walk in are this one. How you treat her decides whether she ever comes back.</p>
-            <p class="say">
-              “Hi, welcome in — have a look around. I’m right here if you want to see anything
-              closer.”
-              <br />A minute later: “Is anything catching your eye?”
-            </p>
-            <p class="tip">
-              Do not follow her around the shop, and do not ask “Can I help you?” — the answer is
-              always no. Give her space but stay visible. Let her leave feeling comfortable.
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s7">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">She loves it, and it is genuinely too expensive for her</span>
-            <span class="tag tag-nobuy">No sale today</span>
-          </summary>
-          <div class="a">
-            <p class="scene">Nothing you say will change her budget. Something you say can change whether she returns.</p>
-            <p class="say">
-              “I understand — that one is one of our heavier pieces. Can I show you something
-              with the same look in a lighter weight? … And if you like, leave me your number
-              and I’ll call you when the sale starts.”
-            </p>
-            <p class="tip">
-              Never show her something over budget a second time, and never look disappointed.
-              She may come back for a smaller piece, or send her sister.
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s8">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">“I need to ask my husband first.”</span>
-            <span class="tag tag-nobuy">No sale today</span>
-          </summary>
-          <div class="a">
-            <p class="scene">
-              The person who decides is not in the shop. Your job is to make the decision easy to
-              make at home.
-            </p>
-            <p class="say">
-              “That makes sense, it’s a big decision. Would you like me to take a photo you can
-              send him? I can also put it aside under your name until tomorrow.”
-            </p>
-            <p class="tip">
-              Send her out with something concrete: a photo, the price, the item number, and a
-              time she said she would come back. “Come back any time” is how a sale disappears.
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s9">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">He came in for a repair, not to buy anything</span>
-            <span class="tag tag-nobuy">No sale today</span>
-          </summary>
-          <div class="a">
-            <p class="scene">He is already a customer. This visit is not a sale — it is the reason for the next one.</p>
-            <p class="say">
-              “Of course, let me have a look. … The clasp needs replacing, and it should be ready
-              by Thursday. While you’re here, would you like me to clean your ring as well? That’s
-              free.”
-            </p>
-            <p class="tip">
-              Never treat a service visit as a waste of time, and never rush it because nobody is
-              buying. Write everything down, give a clear day, and ring him when you say you will.
-            </p>
-          </div>
-        </details>
-
-        <details class="qa" data-id="s10">
-          <summary>
-            <span class="tick"></span>
-            <span class="q">She comes in unhappy — the chain broke after two weeks</span>
-            <span class="tag tag-nobuy">No sale today</span>
-          </summary>
-          <div class="a">
-            <p class="scene">This is the one they most want to see you handle. Stay calm and it is a save, not a loss.</p>
-            <p class="say">
-              “I’m sorry about that — let’s sort it out. Tell me what happened.”
-              <br />Let her finish. Then: “You bought it three weeks ago, so I can repair it or
-              exchange it. Which would you prefer?”
-            </p>
-            <p class="tip">
-              Let her finish before you speak, even if she is angry. Never open with “that’s our
-              policy”. Apologise for the trouble, fix what you can, and get the manager rather than
-              guessing. A complaint handled well often turns into a regular customer.
-            </p>
-          </div>
-        </details>
-      </section>
-
       <!-- =============================================== QUESTIONS TO ASK -->
       <section id="ask">
-        <h2><span class="num">6</span> Questions to ask them</h2>
+        <h2><span class="num">5</span> Questions to ask them</h2>
 
         <p class="section-note">
           At the end they will ask, “Do you have any questions for us?” Always say yes and ask two or
@@ -730,7 +510,7 @@
 
       <!-- ==================================================== CHECKLIST -->
       <section id="checklist">
-        <h2><span class="num">7</span> Before you go</h2>
+        <h2><span class="num">6</span> Before you go</h2>
 
         <div class="cards">
           <div class="card">
@@ -798,6 +578,6 @@
       </p>
     </main>
 
-    <script src="js/interview.js?v=15"></script>
+    <script src="js/interview.js?v=16"></script>
   </body>
 </html>

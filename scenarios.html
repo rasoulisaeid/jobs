@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop Floor — Jobs</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%238b5cf6' d='M6 4h20l2 6a4 4 0 0 1-7.5 2A4 4 0 0 1 16 14a4 4 0 0 1-4.5-2A4 4 0 0 1 4 10zm1 11.5A6 6 0 0 0 11.5 15 6 6 0 0 0 16 16.6 6 6 0 0 0 20.5 15a6 6 0 0 0 4.5.5V27a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="css/style.css?v=16" />
+  <link rel="stylesheet" href="css/scenarios.css?v=16" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">&#9670;</span>
+      <span class="brand-name">Shop Floor</span>
+      <span id="count" class="brand-count"></span>
+    </div>
+
+    <div class="topbar-actions">
+      <span id="syncDot" class="sync-dot" title="Sync status"></span>
+      <button id="practiceBtn" class="btn ghost small" type="button">Hide my lines</button>
+      <button id="toggleAll" class="btn ghost small" type="button">Expand all</button>
+      <button id="resetProgress" class="btn ghost small" type="button">Reset &#10003;</button>
+      <button id="printBtn" class="icon-btn" title="Print" aria-label="Print">
+        <span class="material-symbols-rounded">print</span>
+      </button>
+      <a class="icon-btn" href="interview.html" title="Interview prep" aria-label="Interview prep">
+        <span class="material-symbols-rounded">school</span>
+      </a>
+      <a class="icon-btn" href="index.html" title="Back to jobs" aria-label="Back to jobs">
+        <span class="material-symbols-rounded">arrow_back</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="floor">
+    <p class="lede">
+      Ten customers walk in. Each one is a whole conversation, from the door to the door —
+      what they say, what you say back, and why. <strong>Five buy</strong>, easiest first.
+      <strong>Five leave with nothing</strong>, each for a different reason, and every one of
+      those is still a good visit. Press <strong>Hide my lines</strong> to say your part out
+      loud first, then tap to check.
+    </p>
+
+    <div class="progress-bar">
+      <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+      <span id="progressText" class="progress-text"></span>
+    </div>
+
+    <!-- ------------------------------------------------------------ voices -->
+    <div class="voice-bar">
+      <div class="voice-row">
+        <span class="voice-role">
+          <span class="material-symbols-rounded">record_voice_over</span> Customer
+        </span>
+        <select id="voiceSelect" aria-label="Voice used for the customer"></select>
+        <button id="testVoiceBtn" class="btn ghost small" type="button">Test</button>
+      </div>
+
+      <div class="voice-row">
+        <span class="voice-role">
+          <span class="material-symbols-rounded">face_2</span> You
+        </span>
+        <select id="answerVoiceSelect" aria-label="Voice used for your lines"></select>
+        <button id="testAnswerBtn" class="btn ghost small" type="button">Test</button>
+      </div>
+
+      <div class="voice-row voice-manage">
+        <button id="addVoiceBtn" class="btn ghost small" type="button">
+          <span class="material-symbols-rounded">add</span> Add a voice
+        </button>
+        <button id="removeVoiceBtn" class="btn ghost small" type="button" hidden>
+          Remove the customer voice
+        </button>
+        <button id="clearAudioBtn" class="btn ghost small" type="button" hidden>
+          Clear saved audio
+        </button>
+      </div>
+      <p id="voiceStatus" class="hint"></p>
+      <p id="savedAudio" class="hint ok"></p>
+
+      <form id="addVoiceForm" class="voice-form" hidden>
+        <label class="field">
+          <span class="label">Name</span>
+          <input id="voiceName" type="text" placeholder="e.g. American — male" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span class="label">ElevenLabs voice ID</span>
+          <input id="voiceId" type="text" placeholder="e.g. 21m00Tcm4TlvDq8ikWAM" autocomplete="off" spellcheck="false" />
+        </label>
+        <div class="voice-form-actions">
+          <button type="submit" class="btn primary small">Add voice</button>
+          <button type="button" id="cancelVoiceBtn" class="btn ghost small">Cancel</button>
+        </div>
+        <p class="hint">
+          ElevenLabs &rarr; <strong>Voices</strong> &rarr; pick one &rarr; copy its <strong>Voice ID</strong>.
+          Add a few accents so the customer does not always sound the same.
+        </p>
+      </form>
+    </div>
+
+    <div id="list"></div>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="js/store.js?v=16"></script>
+  <script src="js/sync.js?v=16"></script>
+  <script src="js/ui.js?v=16"></script>
+  <script src="js/voice.js?v=16"></script>
+  <script src="js/scenario-data.js?v=16"></script>
+  <script src="js/scenarios.js?v=16"></script>
+</body>
+</html>

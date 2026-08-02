@@ -1,0 +1,296 @@
+/* Shop floor — ten conversations. Builds on the shell in style.css. */
+
+.floor {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 22px 90px;
+}
+
+.lede {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0 0 18px;
+  max-width: 68ch;
+}
+.lede strong { color: var(--soft); font-weight: 800; }
+
+/* ── progress ─────────────────────────────────────────── */
+
+.progress-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.progress-track {
+  flex: 1; height: 7px; background: var(--border);
+  border-radius: 999px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; width: 0; background: var(--primary);
+  border-radius: 999px; transition: width .25s ease;
+}
+.progress-text {
+  font-size: 13px; color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* ── voices ───────────────────────────────────────────── */
+
+.voice-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: 13px 16px;
+  margin-bottom: 26px;
+}
+.voice-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.voice-row select { flex: 1; min-width: 170px; }
+.voice-row:last-of-type { margin-bottom: 0; }
+
+.voice-role {
+  display: inline-flex; align-items: center; gap: 6px;
+  width: 118px; flex: none;
+  font-size: 13px; font-weight: 800; color: var(--soft);
+}
+.voice-role .material-symbols-rounded { font-size: 18px; color: var(--primary); }
+
+.voice-manage { padding-top: 4px; }
+.voice-bar .hint { margin: 8px 0 0; }
+#savedAudio:empty { display: none; }
+
+.voice-form {
+  margin-top: 13px; padding-top: 13px;
+  border-top: 1px solid var(--border);
+  display: grid; gap: 10px;
+}
+.voice-form .field { display: grid; gap: 3px; }
+.voice-form .label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.voice-form-actions { display: flex; gap: 8px; }
+#voiceId { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+
+/* ── the two groups ───────────────────────────────────── */
+
+.group { margin-bottom: 40px; scroll-margin-top: 80px; }
+
+.group h2 {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 19px; font-weight: 800;
+  letter-spacing: -.01em;
+  margin: 0 0 4px;
+}
+.group h2 .dot {
+  width: 11px; height: 11px; border-radius: 50%; flex: none;
+}
+.group h2 .dot.buy { background: #16a34a; }
+.group h2 .dot.walk { background: var(--border-2); }
+
+.group-count {
+  font-size: 12px; font-weight: 800; color: var(--muted);
+  background: var(--card-2); border-radius: 999px;
+  padding: 1px 9px;
+}
+
+.group-note {
+  color: var(--muted); font-size: 14px; line-height: 1.55;
+  margin: 0 0 14px; max-width: 66ch;
+}
+
+/* ── a scenario card ──────────────────────────────────── */
+
+.scn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 10px;
+  overflow: hidden;
+  scroll-margin-top: 80px;
+}
+.scn[open] { border-color: var(--border-2); box-shadow: var(--shadow-md); }
+
+.scn summary {
+  display: flex; align-items: center; gap: 11px;
+  padding: 14px 16px;
+  cursor: pointer; list-style: none; user-select: none;
+}
+.scn summary::-webkit-details-marker { display: none; }
+.scn summary:hover { background: #fbfbfe; }
+
+.scn-n {
+  flex: none;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--card-2); color: var(--muted);
+  display: grid; place-items: center;
+  font-size: 12.5px; font-weight: 800;
+}
+.scn-title { flex: 1; font-weight: 700; font-size: 15.5px; min-width: 0; }
+.scn.done .scn-title { color: var(--muted); }
+
+/* difficulty */
+.dots { display: inline-flex; gap: 3px; flex: none; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--border-2); }
+.dots i.on { background: var(--primary); }
+
+.tag {
+  flex: none; border-radius: 999px; padding: 2px 10px;
+  font-size: 11.5px; font-weight: 800; white-space: nowrap;
+}
+.tag-buy { background: #dcfce7; color: #166534; }
+.tag-walk { background: var(--card-2); color: var(--muted); }
+
+/* practised tick */
+.tick {
+  flex: none; width: 20px; height: 20px;
+  border: 2px solid var(--border-2); border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  transition: background .12s ease, border-color .12s ease;
+}
+.tick:hover { border-color: var(--primary); }
+.tick::after {
+  content: '✓'; font-size: 12px; font-weight: 700; color: #fff; opacity: 0; line-height: 1;
+}
+.scn.done .tick { background: var(--primary); border-color: var(--primary); }
+.scn.done .tick::after { opacity: 1; }
+
+/* ── the body ─────────────────────────────────────────── */
+
+.scn-body { padding: 2px 18px 20px; }
+
+.setup {
+  margin: 0 0 10px;
+  font-size: 14.5px; line-height: 1.6;
+  color: var(--soft); font-style: italic;
+}
+
+.reason {
+  margin: 0 0 12px; padding: 9px 13px;
+  background: var(--card-2); border-radius: var(--r-sm);
+  font-size: 14px; line-height: 1.55; color: var(--soft);
+}
+.reason b { font-weight: 800; color: var(--text); font-style: normal; }
+
+.convo-bar { margin-bottom: 14px; }
+.play-all.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* ── the conversation ─────────────────────────────────── */
+
+.convo { display: grid; gap: 9px; }
+
+.turn { display: flex; align-items: flex-start; gap: 9px; }
+
+.who {
+  flex: none; width: 66px; padding-top: 9px;
+  font-size: 11px; font-weight: 800; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+.bubble {
+  flex: 1; min-width: 0;
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+}
+.t-them .bubble { background: var(--card-2); }
+.t-you .bubble { background: var(--primary-soft); }
+.t-you .who { color: var(--primary-2); }
+
+.bubble .line { margin: 0; font-size: 15px; line-height: 1.55; }
+.t-you .bubble .line { font-weight: 600; }
+
+.bubble .note {
+  margin: 8px 0 0; padding-top: 7px;
+  border-top: 1px solid rgba(45, 45, 80, .09);
+  font-size: 13px; line-height: 1.5; color: var(--muted);
+}
+.bubble .note::before { content: 'Why — '; font-weight: 800; color: var(--soft); }
+
+/* stage directions: what you do, not what you say */
+.t-stage {
+  margin: 2px 0 2px 75px;
+  font-size: 13.5px; line-height: 1.5;
+  color: var(--muted); font-style: italic;
+}
+
+.line-play {
+  flex: none; margin-top: 4px;
+  border: none; background: none; color: var(--border-2);
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+}
+.turn:hover .line-play { color: var(--primary-2); }
+.line-play:hover { background: var(--card-2); color: var(--primary-2); }
+.line-play:disabled { opacity: .6; cursor: default; }
+.line-play .material-symbols-rounded { font-size: 18px; }
+
+.turn.speaking .bubble {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* ── practice mode ────────────────────────────────────── */
+
+body.practice .t-you .bubble {
+  filter: blur(5px);
+  cursor: pointer;
+  user-select: none;
+  transition: filter .15s ease;
+}
+body.practice .t-you .bubble:hover { filter: blur(3.5px); }
+body.practice .t-you.shown .bubble { filter: none; cursor: default; }
+
+body.practice .t-you .who::after {
+  content: ' — tap to check';
+  display: block;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0;
+  text-transform: none; color: var(--border-2);
+}
+body.practice .t-you.shown .who::after { content: none; }
+
+#practiceBtn.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* ── after, and the lessons ───────────────────────────── */
+
+.after {
+  margin: 16px 0 0; padding: 12px 15px;
+  background: #f6fdf8; border-left: 3px solid #16a34a;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: 14.5px; line-height: 1.6; color: #14532d;
+}
+/* A walk-out still ends well, but it should not read as a green tick. */
+#walkouts .after { background: #fafaff; border-left-color: var(--primary); color: #3b3468; }
+
+.lessons {
+  margin-top: 14px; padding: 13px 16px;
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+}
+.lessons-title {
+  margin: 0 0 8px;
+  font-size: 11px; font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted);
+}
+.lessons ul { margin: 0; padding-left: 18px; }
+.lessons li { font-size: 14px; line-height: 1.6; margin-bottom: 4px; color: var(--soft); }
+.lessons li:last-child { margin-bottom: 0; }
+
+/* ── narrow ───────────────────────────────────────────── */
+
+@media (max-width: 620px) {
+  .floor { padding: 18px 14px 70px; }
+  .scn-body { padding: 2px 13px 16px; }
+  .turn { flex-wrap: wrap; }
+  .who { width: 100%; padding-top: 0; }
+  .t-stage { margin-left: 0; }
+  .dots { display: none; }
+}
+
+/* ── print ────────────────────────────────────────────── */
+
+@media print {
+  @page { size: letter; margin: .6in; }
+  .topbar, .voice-bar, .progress-bar, .convo-bar, .line-play, .tick, .toast {
+    display: none !important;
+  }
+  html, body { background: #fff; }
+  body.practice .t-you .bubble { filter: none !important; }
+  body.practice .t-you .who::after { content: none !important; }
+  .floor { max-width: none; padding: 0; }
+  .scn { box-shadow: none; break-inside: avoid; page-break-inside: avoid; border-color: #ccc; }
+  .scn:not([open]) .scn-body { display: block; }
+  .group h2 { break-after: avoid; page-break-after: avoid; }
+}
